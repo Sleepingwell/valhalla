@@ -1,3 +1,4 @@
+#include <iterator>
 #include "baldr/edgeinfo.h"
 #include "baldr/graphconstants.h"
 
@@ -24,6 +25,12 @@ json::ArrayPtr names_json(const std::vector<std::string>& names) {
   return a;
 }
 
+json::ArrayPtr osmids_json(const uint64_t* osmids, uint32_t size) {
+  auto a = json::array({});
+  std::for_each(osmids, osmids+size, [&](uint64_t v) { a->push_back(v); });
+  return a;
+}
+
 } // namespace
 
 namespace valhalla {
@@ -42,6 +49,10 @@ EdgeInfo::EdgeInfo(char* ptr, const char* names_list, const size_t names_list_le
   // Set encoded_shape_ pointer
   encoded_shape_ = ptr;
   ptr += (encoded_shape_size() * sizeof(char));
+
+  // set the osm ids
+  osmids_ = reinterpret_cast<uint64_t const*>(ptr);
+  ptr += ei_.osmids_size_ * sizeof(uint64_t);
 
   // Optional second half of 64bit way id
   extended_wayid2_ = extended_wayid3_ = 0;
@@ -177,6 +188,15 @@ std::string EdgeInfo::encoded_shape() const {
                                    : std::string(encoded_shape_, ei_.encoded_shape_size_);
 }
 
+std::vector<uint64_t> EdgeInfo::osmids_vector() const {
+  //std::vector<uint64_t> result;
+  //result.reserve(osmids_size());
+  //std::copy(osmids_, osmids_ + osmids_size(), std::back_inserter(result));
+  std::vector<uint64_t> result(osmids_size());
+  std::copy(osmids_, osmids_ + osmids_size(), result.begin());
+  return result;
+}
+
 json::MapPtr EdgeInfo::json() const {
   json::MapPtr edge_info = json::map({
       {"way_id", static_cast<uint64_t>(wayid())},
@@ -185,6 +205,10 @@ json::MapPtr EdgeInfo::json() const {
       {"names", names_json(GetNames())},
       {"shape", midgard::encode(shape())},
   });
+
+  if(has_osmids()) {
+    edge_info->emplace("osmids", osmids_json(osmids(), osmids_size()));
+  }
 
   if (speed_limit() == kUnlimitedSpeedLimit) {
     edge_info->emplace("speed_limit", std::string("unlimited"));

@@ -261,6 +261,7 @@ trim_polyline(const iterator_t& begin,
  */
 template <class container_t> container_t trim_front(container_t& pts, const float dist);
 
+typedef std::pair<PointLL, uint64_t> PointLLAndOSMId;
 /**
  * Trims shape (in-place) from start and end vertices.
  *
@@ -274,7 +275,7 @@ void trim_shape(float start,
                 PointLL start_vertex, // NOLINT
                 float end,
                 PointLL end_vertex, // NOLINT
-                std::vector<PointLL>& shape);
+                std::vector<PointLLAndOSMId>& shape);
 
 /**
  * Estimate the angle of the tangent at a point along a discretised curve. We attempt

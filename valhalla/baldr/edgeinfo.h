@@ -172,6 +172,20 @@ public:
    */
   const std::vector<midgard::PointLL>& shape() const;
 
+  const uint64_t* osmids() const {
+    return osmids_;
+  }
+
+  std::vector<uint64_t> osmids_vector() const;
+
+  uint32_t osmids_size() const {
+    return ei_.osmids_size_;
+  }
+
+  bool has_osmids() const {
+    return osmids_size() != 0u;
+  }
+
   midgard::Shape7Decoder<midgard::PointLL> lazy_shape() const {
     return midgard::Shape7Decoder<midgard::PointLL>(encoded_shape_, ei_.encoded_shape_size_);
   }
@@ -205,6 +219,8 @@ public:
     uint32_t extended_wayid1_ : 8;     // Next next byte of the way id
     uint32_t extended_wayid_size_ : 2; // How many more bytes the way id is stored in
     uint32_t spare0_ : 2;              // not used
+
+    uint16_t osmids_size_;             // How many items in the 'list' of OSM ids is
   };
 
 protected:
@@ -223,6 +239,8 @@ protected:
 
   // Lng, lat shape of the edge
   mutable std::vector<midgard::PointLL> shape_;
+
+  const uint64_t* osmids_;
 
   // The list of names within the tile
   const char* names_list_;

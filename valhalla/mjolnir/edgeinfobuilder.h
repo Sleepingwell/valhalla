@@ -85,6 +85,15 @@ public:
   template <class shape_container_t> void set_shape(const shape_container_t& shape);
 
   /**
+   * Set the OSM ids of the points in the edge.
+   * @param  osmids  List of OSM ids corresponding to the points describing the
+   *                shape of the edge.
+   */
+public:
+  template <class osmids_container_t> void set_osmids(const osmids_container_t& osmids);
+  template <class osmids_container_t, typename size_type> void set_osmids(const osmids_container_t* osmids, size_type size);
+
+  /**
    * Set the encoded shape string.
    * @param  encoded_shape  Encoded shape string
    */
@@ -104,6 +113,8 @@ public:
   std::size_t SizeOf() const;
 
 protected:
+  template <class Iter, typename Size> void do_set_osmids(Iter a, Iter b, Size size);
+
   // Fixed size information
   baldr::EdgeInfo::EdgeInfoInner ei_{};
 
@@ -113,6 +124,9 @@ protected:
 
   // List of name info (offsets, etc.)
   std::vector<baldr::NameInfo> name_info_list_;
+
+  // List of OSM ids for pionts in the shape.
+  std::vector<uint64_t> osmids_;
 
   // Lat,lng shape of the edge
   std::string encoded_shape_;

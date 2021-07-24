@@ -75,6 +75,21 @@ template <class shape_container_t> void EdgeInfoBuilder::set_shape(const shape_c
 template void EdgeInfoBuilder::set_shape<std::vector<PointLL>>(const std::vector<PointLL>&);
 template void EdgeInfoBuilder::set_shape<std::list<PointLL>>(const std::list<PointLL>&);
 
+// set the osm ids
+template <class Iter, typename Size> void EdgeInfoBuilder::do_set_osmids(Iter a, Iter b, Size size) {
+  osmids_.resize(size);
+  std::copy(a, b, osmids_.begin());
+  ei_.osmids_size_ = size;
+}
+template <class osmids_container_t> void EdgeInfoBuilder::set_osmids(const osmids_container_t& osmids) {
+  do_set_osmids(osmids.begin(), osmids.end(), osmids.size());
+}
+template void EdgeInfoBuilder::set_osmids<std::vector<uint64_t>>(const std::vector<uint64_t>&);
+template <typename osmids_container_t, typename size_type> void EdgeInfoBuilder::set_osmids(const osmids_container_t* osmids, size_type size) {
+  do_set_osmids(osmids, osmids + size, size);
+}
+template void EdgeInfoBuilder::set_osmids<uint64_t, uint32_t>(const uint64_t*, uint32_t);
+
 // Set the encoded shape string.
 void EdgeInfoBuilder::set_encoded_shape(const std::string& encoded_shape) {
   std::copy(encoded_shape.begin(), encoded_shape.end(), back_inserter(encoded_shape_));
@@ -85,6 +100,7 @@ std::size_t EdgeInfoBuilder::BaseSizeOf() const {
   std::size_t size = sizeof(EdgeInfo::EdgeInfoInner);
   size += (name_info_list_.size() * sizeof(NameInfo));
   size += (encoded_shape_.size() * sizeof(std::string::value_type));
+  size += (osmids_.size() * sizeof(uint64_t));
   size += ei_.extended_wayid_size_;
   return size;
 }
@@ -120,11 +136,16 @@ std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& eib) {
     ei.encoded_shape_size_ = static_cast<uint32_t>(eib.encoded_shape_.size());
   }
 
+  ei.osmids_size_ = eib.osmids_.size();
+
   // Write out the bytes
   os.write(reinterpret_cast<const char*>(&ei), sizeof(ei));
   os.write(reinterpret_cast<const char*>(eib.name_info_list_.data()),
            (name_count * sizeof(NameInfo)));
   os << eib.encoded_shape_;
+  if (eib.osmids_.size() > 0) {
+    os.write(reinterpret_cast<const char*>(eib.osmids_.data()), eib.osmids_.size() * sizeof(uint64_t));
+  }
   if (ei.extended_wayid_size_ > 0) {
     os.write(reinterpret_cast<const char*>(&eib.extended_wayid2_), sizeof(eib.extended_wayid2_));
   }

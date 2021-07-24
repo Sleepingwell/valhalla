@@ -182,6 +182,7 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
       eib.AddNameInfo(info);
     }
     eib.set_encoded_shape(ei.encoded_shape());
+    eib.set_osmids(ei.osmids(), ei.osmids_size());
     edge_info_offset_ += eib.SizeOf();
     edgeinfo_list_.emplace_back(std::move(eib));
 
@@ -535,6 +536,25 @@ bool GraphTileBuilder::HasEdgeInfo(const uint32_t edgeindex,
   return false;
 }
 
+template <class shape_container_t>
+uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
+                                         const GraphId& nodea,
+                                         const baldr::GraphId& nodeb,
+                                         const uint64_t wayid,
+                                         const float elev,
+                                         const uint32_t bike_network,
+                                         const uint32_t speed_limit,
+                                         const shape_container_t& lls,
+                                         const std::vector<std::string>& names,
+                                         const std::vector<std::string>& tagged_names,
+                                         const uint16_t types,
+                                         bool& added,
+                                         bool diff_names) {
+  return AddEdgeInfo(edgeindex, nodea, nodeb, wayid, elev, bike_network, speed_limit, lls,
+              std::vector<uint64_t>{},
+              names, tagged_names, types, added, diff_names);
+}
+
 // Add edge info
 template <class shape_container_t>
 uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
@@ -545,6 +565,7 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
                                        const uint32_t bike_network,
                                        const uint32_t speed_limit,
                                        const shape_container_t& lls,
+                                       const std::vector<uint64_t>& osmids,
                                        const std::vector<std::string>& names,
                                        const std::vector<std::string>& tagged_names,
                                        const uint16_t types,
@@ -562,6 +583,7 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_bike_network(bike_network);
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_shape(lls);
+    edgeinfo.set_osmids(osmids);
 
     // Add names to the common text/name list. Skip blank names.
     std::vector<NameInfo> name_info_list;
@@ -651,6 +673,20 @@ template uint32_t GraphTileBuilder::AddEdgeInfo<std::list<PointLL>>(const uint32
                                                                     const uint16_t,
                                                                     bool&,
                                                                     bool);
+template uint32_t GraphTileBuilder::AddEdgeInfo<std::list<PointLL>>(const uint32_t edgeindex,
+                                                                    const GraphId&,
+                                                                    const baldr::GraphId&,
+                                                                    const uint64_t,
+                                                                    const float,
+                                                                    const uint32_t,
+                                                                    const uint32_t,
+                                                                    const std::list<PointLL>&,
+                                                                    const std::vector<uint64_t>&,
+                                                                    const std::vector<std::string>&,
+                                                                    const std::vector<std::string>&,
+                                                                    const uint16_t,
+                                                                    bool&,
+                                                                    bool);
 
 // AddEdgeInfo - accepts an encoded shape string.
 uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
@@ -661,6 +697,24 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
                                        const uint32_t bike_network,
                                        const uint32_t speed_limit,
                                        const std::string& llstr,
+                                       const std::vector<std::string>& names,
+                                       const std::vector<std::string>& tagged_names,
+                                       const uint16_t types,
+                                       bool& added,
+                                       bool diff_names) {
+  return AddEdgeInfo(edgeindex, nodea, nodeb, wayid, elev, bike_network, speed_limit, llstr,
+              std::vector<uint64_t>{},
+              names, tagged_names, types, added, diff_names);
+}
+uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
+                                       const baldr::GraphId& nodea,
+                                       const baldr::GraphId& nodeb,
+                                       const uint64_t wayid,
+                                       const float elev,
+                                       const uint32_t bike_network,
+                                       const uint32_t speed_limit,
+                                       const std::string& llstr,
+                                       const std::vector<uint64_t>& osmids,
                                        const std::vector<std::string>& names,
                                        const std::vector<std::string>& tagged_names,
                                        const uint16_t types,
@@ -678,6 +732,7 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_bike_network(bike_network);
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_encoded_shape(llstr);
+    edgeinfo.set_osmids(osmids);
 
     // Add names to the common text/name list. Skip blank names.
     std::vector<NameInfo> name_info_list;

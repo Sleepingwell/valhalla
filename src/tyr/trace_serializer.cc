@@ -63,6 +63,16 @@ json::ArrayPtr serialize_edges(const AttributesController& controller,
 
       // Process each edge
       auto edge_map = json::map({});
+
+      // the osm ids
+      if(edge.osm_ids_size() > 0) {
+        auto osmids = json::array({});
+        for (auto id: edge.osm_ids()) {
+          osmids->push_back(id);
+        }
+        edge_map->emplace("osmids", osmids);
+      }
+
       if (edge.has_truck_route()) {
         edge_map->emplace("truck_route", static_cast<bool>(edge.truck_route()));
       }
