@@ -1520,6 +1520,10 @@ void TripLegBuilder::Build(
       trip_node->mutable_cost()->mutable_transition_cost()->set_cost(edge_itr->transition_cost.cost);
     }
 
+    if(node->has_osmid()) {
+      trip_node->set_osmid(node->osmid());
+    }
+
     // Add multi modal stuff
     multimodal_builder.Build(trip_node, edge_itr->trip_id, node, startnode, directededge, edge,
                              start_tile, graphtile, mode_costing, controller, graphreader);

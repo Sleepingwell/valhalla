@@ -77,7 +77,8 @@ NodeInfo::NodeInfo(const PointLL& tile_corner,
                    const NodeType type,
                    const bool traffic_signal,
                    const bool tagged_access,
-                   const bool private_access) {
+                   const bool private_access,
+                   const uint64_t osmid) {
   memset(this, 0, sizeof(NodeInfo));
   set_latlng(tile_corner, ll);
   set_access(access);
@@ -85,6 +86,7 @@ NodeInfo::NodeInfo(const PointLL& tile_corner,
   set_traffic_signal(traffic_signal);
   set_tagged_access(tagged_access);
   set_private_access(private_access);
+  set_osmid(osmid);
 }
 
 // Sets the latitude and longitude.
@@ -269,6 +271,9 @@ json::MapPtr NodeInfo::json(const graph_tile_ptr& tile) const {
       {"transition count", static_cast<uint64_t>(transition_count_)},
       {"named_intersection", static_cast<bool>(named_)},
   });
+  if(has_osmid()) {
+    m->emplace("osmid", static_cast<uint64_t>(osmid()));
+  }
   if (is_transit()) {
     m->emplace("stop_index", static_cast<uint64_t>(stop_index()));
   }

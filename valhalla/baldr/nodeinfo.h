@@ -49,7 +49,8 @@ public:
            const baldr::NodeType type,
            const bool traffic_signal,
            const bool tagged_access,
-           const bool private_access);
+           const bool private_access,
+           uint64_t osmid = std::numeric_limits<uint64_t>::max());
 
   /**
    * Get the latitude, longitude of the node.
@@ -415,6 +416,25 @@ public:
    */
   json::MapPtr json(const graph_tile_ptr& tile) const;
 
+  /**
+   * Returns the OSM id.
+   * @return Returns the OSM id.
+   */
+  uint64_t osmid() const {
+    return osmid_;
+  }
+
+  /**
+   * Sets the OSM id.
+   */
+  void set_osmid(uint64_t id) {
+    osmid_ = id;
+  }
+
+  bool has_osmid() const {
+    return osmid_ != std::numeric_limits<uint64_t>::max();
+  }
+
 protected:
   // Organized into 8-byte words so structure will align to 8 byte boundaries.
 
@@ -453,6 +473,8 @@ protected:
   // for all other levels. Connecting way Id (for transit level) while data build occurs.
   // Need to keep this in NodeInfo since it is used in map-matching.
   uint64_t headings_;
+
+  uint64_t osmid_;
 };
 
 } // namespace baldr
