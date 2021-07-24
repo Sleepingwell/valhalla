@@ -218,6 +218,48 @@ public:
                        bool diff_names = false);
 
   /**
+   * Add the edge info to the tile.
+   *
+   * @param  edgeindex  The index of the edge - used with nodea and nodeb to
+   *                    form tuple that uniquely identifies the edge info since
+   *                    there are two directed edges per edge info.
+   * @param  nodea  One of two nodes - used with edgeindex and nodeb to
+   *                form tuple that uniquely identifies the edge info since
+   *                there are two directed edges per edge info.
+   * @param  nodeb  One of two nodes - used with edgeindex and nodea to
+   *                form tuple that uniquely identifies the edge info since
+   *                there are two directed edges per edge info.
+   * @param  wayid  The target edge is part of this the way id.
+   * @param  elev   Mean elevation.
+   * @param  bn     Bike network.
+   * @param  spd    Speed limit. [kph]
+   * @param  lls    The shape of the target edge.
+   * @param  osmids The OSM ids of the locations in *lls*.
+   * @param  names  The names of the target edge.
+   * @param  types  Bits indicating if the name is a ref vs a name.
+   * @param  added  Set to true if the target edge was newly added to the list,
+   *                set to false if the target edge was already in the list.
+   * @param  diff_names Indicates the opposing direction has different names.
+   *                    If true a new EdgeInfo is always added.
+   * @return  The edge info offset that will be stored in the directed edge.
+   */
+  template <class shape_container_t>
+  uint32_t AddEdgeInfo(const uint32_t edgeindex,
+                       const baldr::GraphId& nodea,
+                       const baldr::GraphId& nodeb,
+                       const uint64_t wayid,
+                       const float elev,
+                       const uint32_t bn,
+                       const uint32_t spd,
+                       const shape_container_t& lls,
+                       const std::vector<uint64_t>& osmids,
+                       const std::vector<std::string>& names,
+                       const std::vector<std::string>& tagged_names,
+                       const uint16_t types,
+                       bool& added,
+                       bool diff_names = false);
+
+  /**
    * Add the edge info to the tile. This method accepts an encoded shape string.
    * @param  edgeindex    The index of the edge - used with nodea and nodeb to
    *                      form tuple that uniquely identifies the edge info since
@@ -250,6 +292,47 @@ public:
                        const uint32_t bn,
                        const uint32_t spd,
                        const std::string& llstr,
+                       const std::vector<std::string>& names,
+                       const std::vector<std::string>& tagged_names,
+                       const uint16_t types,
+                       bool& added,
+                       bool diff_names = false);
+
+  /**
+   * Add the edge info to the tile. This method accepts an encoded shape string.
+   * @param  edgeindex    The index of the edge - used with nodea and nodeb to
+   *                      form tuple that uniquely identifies the edge info since
+   *                      there are two directed edges per edge info.
+   * @param  nodea        One of two nodes - used with edgeindex and nodeb to
+   *                      form tuple that uniquely identifies the edge info since
+   *                      there are two directed edges per edge info.
+   * @param  nodeb        One of two nodes - used with edgeindex and nodea to
+   *                      form tuple that uniquely identifies the edge info since
+   *                      there are two directed edges per edge info.
+   * @param  wayid        The target edge is part of this the way id.
+   * @param  elev         Mean elevation.
+   * @param  bn           Bike network.
+   * @param  spd          Speed limit.
+   * @param  llstr        The shape of the target edge as an encoded string.
+   * @param  osmids The OSM ids of the locations in *lls*.
+   * @param  names        The names of the target edge.
+   * @param  tagged_names The tagged names of the target edge.
+   * @param  types        Bits indicating if the name is a ref vs a name.
+   * @param  added        Set to true if the target edge was newly added to the list,
+   *                      set to false if the target edge was already in the list.
+   * @param  diff_names   Indicates the opposing direction has different names.
+   *                      If true a new EdgeInfo is always added.
+   * @return  The edge info offset that will be stored in the directed edge.
+   */
+  uint32_t AddEdgeInfo(const uint32_t edgeindex,
+                       const baldr::GraphId& nodea,
+                       const baldr::GraphId& nodeb,
+                       const uint64_t wayid,
+                       const float elev,
+                       const uint32_t bn,
+                       const uint32_t spd,
+                       const std::string& llstr,
+                       const std::vector<uint64_t>& osmids,
                        const std::vector<std::string>& names,
                        const std::vector<std::string>& tagged_names,
                        const uint16_t types,

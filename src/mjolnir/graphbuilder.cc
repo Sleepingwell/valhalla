@@ -426,6 +426,14 @@ void BuildTileSet(const std::string& ways_file,
     return shape;
   };
 
+  const auto EdgeOSMIds = [&way_nodes](size_t idx, const size_t count) {
+    std::vector<uint64_t> osmids; osmids.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+      osmids.emplace_back((*way_nodes[idx++]).node.osmid_);
+    }
+    return osmids;
+  };
+
   // For each tile in the task
   bool added = false;
   DataQuality stats;
@@ -676,6 +684,7 @@ void BuildTileSet(const std::string& ways_file,
 
             // add the info
             auto shape = EdgeShape(edge.llindex_, edge.attributes.llcount);
+            auto osmids = EdgeOSMIds(edge.llindex_, edge.attributes.llcount);
 
             uint16_t types = 0;
             auto names = w.GetNames(ref, osmdata.name_offset_map, types);
@@ -691,7 +700,7 @@ void BuildTileSet(const std::string& ways_file,
             // Add edge info. Mean elevation is set to 1234 as a placeholder, set later if we have it.
             edge_info_offset = graphtile.AddEdgeInfo(edge_pair.second, (*nodes[source]).graph_id,
                                                      (*nodes[target]).graph_id, w.way_id(), 1234,
-                                                     bike_network, speed_limit, shape, names,
+                                                     bike_network, speed_limit, shape, osmids, names,
                                                      tagged_names, types, added, dual_refs);
             if (added) {
               stats.edgeinfocount++;

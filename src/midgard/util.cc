@@ -100,17 +100,17 @@ void trim_shape(float start,
                 PointLL start_vertex, // NOLINT
                 float end,
                 PointLL end_vertex, // NOLINT
-                std::vector<PointLL>& shape) {
+                std::vector<PointLLAndOSMId>& shape) {
   // clip up to the start point if the start_vertex is valid
   float along = 0.f;
   if (start_vertex.IsValid()) {
     // find the spot at which we cross the distance threshold and stop
     auto current = shape.begin();
     for (; !shape.empty() && (current != shape.end() - 1) && along <= start; ++current) {
-      along += (current + 1)->Distance(*current);
+      along += (current + 1)->first.Distance(current->first);
     }
     // we found the spot to stop for the beginning of the shape so set it to the new beginning
-    *(--current) = start_vertex;
+    (--current)->first = start_vertex;
     shape.erase(shape.begin(), current);
     along = start;
   }
@@ -120,10 +120,10 @@ void trim_shape(float start,
     // find the point at which we cross the distance threshold and stop
     auto current = shape.begin();
     for (; !shape.empty() && (current != shape.end() - 1) && along <= end; ++current) {
-      along += (current + 1)->Distance(*current);
+      along += (current + 1)->first.Distance(current->first);
     }
     // found the spot to stop for the end of the shape so set it to the new end
-    *(current) = end_vertex;
+    current->first = end_vertex;
     shape.erase(++current, shape.end());
   }
 }
