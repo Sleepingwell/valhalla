@@ -279,7 +279,8 @@ void add_bss_nodes_and_edges(GraphTileBuilder& tilebuilder_local,
                           NodeType::kBikeShare,
                           false,
                           true,
-                          false};
+                          false,
+                          std::numeric_limits<uint64_t>::max()};
 
     new_bss_node.set_mode_change(true);
     new_bss_node.set_edge_index(edge_index);
