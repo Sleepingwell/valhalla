@@ -323,6 +323,10 @@ json::ArrayPtr serialize_edges(const AttributesController& controller,
                                 json::fixed_t{node.cost().transition_cost().seconds(), 3});
         }
 
+        if(node.has_osmid()) {
+          end_node_map->emplace("osmid", static_cast<uint64_t>(node.osmid()));
+        }
+
         // TODO transit info at node
         // kNodeTransitStopInfoType = "node.transit_stop_info.type";
         // kNodeTransitStopInfoOnestopId = "node.transit_stop_info.onestop_id";
