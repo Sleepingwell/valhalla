@@ -303,7 +303,7 @@ void add_bss_nodes_and_edges(GraphTileBuilder& tilebuilder_local,
       uint32_t edge_info_offset =
           tilebuilder_local.AddEdgeInfo(tilebuilder_local.directededges().size(),
                                         new_bss_node_graphid, bss_to_waynode.way_node_id,
-                                        bss_to_waynode.wayid, 0, 0, 0, bss_to_waynode.shape,
+                                        bss_to_waynode.wayid, 0, 0, 0, bss_to_waynode.shape, std::list<uint64_t>(),
                                         bss_to_waynode.names, bss_to_waynode.tagged_names, 0, added);
       directededge.set_edgeinfo_offset(edge_info_offset);
       tilebuilder_local.directededges().emplace_back(std::move(directededge));
@@ -440,7 +440,7 @@ void create_edges(GraphTileBuilder& tilebuilder_local,
       bool added;
       uint32_t edge_info_offset =
           tilebuilder_local.AddEdgeInfo(tilebuilder_local.directededges().size(), lower->way_node_id,
-                                        lower->bss_node_id, lower->wayid, 0, 0, 0, lower->shape,
+                                        lower->bss_node_id, lower->wayid, 0, 0, 0, lower->shape, std::list<uint64_t>(),
                                         lower->names, lower->tagged_names, 0, added);
       directededge.set_edgeinfo_offset(edge_info_offset);
 
