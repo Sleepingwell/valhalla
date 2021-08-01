@@ -161,6 +161,7 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
 
   // EdgeInfo. Create list of EdgeInfoBuilders. Add to text offset set.
   edge_info_offset_ = 0;
+  size_t last_data = 0, next_data;
   edgeinfo_offset_map_.clear();
   for (auto offset : edge_info_offsets) {
     // Verify the offsets match as we create the edge info builder list
@@ -173,6 +174,13 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
     EdgeInfo ei(edgeinfo_ + offset, textlist_, textlist_size_);
     EdgeInfoBuilder eib;
     eib.set_wayid(ei.wayid());
+    next_data = ei.getsomedata();
+    if(last_data > 0) {
+      if(next_data != last_data + 1) {
+          throw std::runtime_error("bang");
+      }
+    }
+    last_data = next_data;
     eib.set_mean_elevation(ei.mean_elevation());
     eib.set_bike_network(ei.bike_network());
     eib.set_speed_limit(ei.speed_limit());
@@ -341,7 +349,9 @@ void GraphTileBuilder::StoreTileData() {
     // Write the edge data
     header_builder_.set_edgeinfo_offset(header_builder_.complex_restriction_reverse_offset() +
                                         reverse_restriction_size);
-    for (const auto& edgeinfo : edgeinfo_list_) {
+    size_t ddd = 0;
+    for (auto& edgeinfo : edgeinfo_list_) {
+      edgeinfo.set_somedata(ddd++);
       in_mem << edgeinfo;
     }
 

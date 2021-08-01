@@ -188,6 +188,10 @@ public:
    */
   json::MapPtr json() const;
 
+  size_t getsomedata() const {
+    return somedata_;
+  }
+
   // Operator EqualTo based on nodea and nodeb.
   bool operator==(const EdgeInfo& rhs) const;
 
@@ -229,6 +233,8 @@ protected:
 
   // The size of the names list
   size_t names_list_length_;
+
+  size_t somedata_;
 };
 
 } // namespace baldr

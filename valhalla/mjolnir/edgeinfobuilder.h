@@ -103,6 +103,11 @@ public:
    */
   std::size_t SizeOf() const;
 
+  void set_somedata(const size_t data) {
+    somedata_ = data;
+  }
+
+
 protected:
   // Fixed size information
   baldr::EdgeInfo::EdgeInfoInner ei_{};
@@ -116,6 +121,8 @@ protected:
 
   // Lat,lng shape of the edge
   std::string encoded_shape_;
+
+  size_t somedata_;
 
   friend std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& id);
 };
