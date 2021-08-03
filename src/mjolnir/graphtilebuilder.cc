@@ -61,6 +61,9 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
   } else {
     header_builder_.set_has_osmids(include_osmids);
   }
+  if (!has_osmids()) {
+    throw std::runtime_error("do not have osm ids just after reading header");
+  }
   header_builder_.set_graphid(graphid);
 
   // Done if not deserializing and creating builders for everything
@@ -197,6 +200,9 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
 
     EdgeInfo ei(edgeinfo_ + offset, textlist_, textlist_size_);
     EdgeInfoBuilder eib;
+    if (ei.index_in_tile() > 1000000) {
+      LOG_INFO(std::string("tile index when reading: ") + std::to_string(ei.index_in_tile()));
+    }
     eib.set_wayid(ei.wayid());
     eib.set_mean_elevation(ei.mean_elevation());
     eib.set_bike_network(ei.bike_network());
@@ -216,6 +222,8 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
                                  " >= " + std::to_string(header_->edgeinfocount()));
       }
       eib.set_index_in_tile(ei.index_in_tile());
+    } else {
+      throw std::runtime_error("Tile did not have osmids");
     }
     edge_info_offset_ += eib.SizeOf();
     edgeinfo_list_.emplace_back(std::move(eib));
@@ -435,6 +443,11 @@ void GraphTileBuilder::StoreTileData() {
     for (auto& edgeinfo : edgeinfo_list_) {
       if (has_osmids()) {
         edgeinfo.set_index_in_tile(index_in_tile++);
+        if (edgeinfo.index_in_tile() != (index_in_tile - 1)) {
+          throw std::runtime_error("index in tile not set properly");
+        }
+      } else {
+        throw std::runtime_error("tile did not have osmids when writing");
       }
       in_mem << edgeinfo;
     }
@@ -656,6 +669,9 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_bike_network(bike_network);
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_shape(lls);
+    if (!has_osmids()) {
+      throw std::runtime_error("has_osmids is false in AddEdgeInfo (vec version)");
+    }
     edgeinfo.set_has_osmids(has_osmids());
 
     // Add names to the common text/name list. Skip blank names.
@@ -774,6 +790,9 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_encoded_shape(llstr);
     edgeinfo.set_has_osmids(has_osmids());
+    if (!has_osmids()) {
+      throw std::runtime_error("has_osmids is false in AddEdgeInfo (vec version)");
+    }
 
     // Add names to the common text/name list. Skip blank names.
     std::vector<NameInfo> name_info_list;

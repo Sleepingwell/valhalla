@@ -70,6 +70,9 @@ void EdgeInfoBuilder::AddNameInfo(const baldr::NameInfo& info) {
 
 // Set the shape of the edge. Encode the vector of lat,lng to a string.
 template <class shape_container_t> void EdgeInfoBuilder::set_shape(const shape_container_t& shape) {
+  //#ifndef NDEBUG
+  ei_.shape_size_ = shape.size();
+  //#endif // not NDEBUG
   encoded_shape_ = midgard::encode7<shape_container_t>(shape);
 }
 template void EdgeInfoBuilder::set_shape<std::vector<PointLL>>(const std::vector<PointLL>&);
@@ -77,6 +80,9 @@ template void EdgeInfoBuilder::set_shape<std::list<PointLL>>(const std::list<Poi
 
 // Set the encoded shape string.
 void EdgeInfoBuilder::set_encoded_shape(const std::string& encoded_shape) {
+  //#ifndef NDEBUG
+  ei_.shape_size_ = midgard::decode7<std::vector<PointLL>>(encoded_shape).size();
+  //#endif // not NDEBUG
   std::copy(encoded_shape.begin(), encoded_shape.end(), back_inserter(encoded_shape_));
 }
 
@@ -129,9 +135,13 @@ std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& eib) {
            (name_count * sizeof(NameInfo)));
   os << eib.encoded_shape_;
   if (ei.extended_wayid_size_ > 0) {
+    // This looks dangerous: I think sizeof(eib.extended_wayid2_) must be 1 for BaseSizeOf() to be
+    // correct.
     os.write(reinterpret_cast<const char*>(&eib.extended_wayid2_), sizeof(eib.extended_wayid2_));
   }
   if (ei.extended_wayid_size_ > 1) {
+    // This looks dangerous: I think sizeof(eib.extended_wayid2_) must be 1 for BaseSizeOf() to be
+    // correct.
     os.write(reinterpret_cast<const char*>(&eib.extended_wayid3_), sizeof(eib.extended_wayid3_));
   }
   if (eib.has_osmids_) {

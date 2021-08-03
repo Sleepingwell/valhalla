@@ -98,6 +98,10 @@ public:
     index_in_tile_ = idx;
   }
 
+  uint32_t index_in_tile() const {
+    return index_in_tile_;
+  }
+
   void set_has_osmids(const bool state) {
     has_osmids_ = state;
   }
@@ -115,6 +119,12 @@ public:
    */
   std::size_t SizeOf() const;
 
+  //#ifndef NDEBUG
+  std::size_t shape_size() const {
+    return ei_.shape_size_;
+  }
+  //#endif // not NDEBUG
+
 protected:
   // Fixed size information
   baldr::EdgeInfo::EdgeInfoInner ei_{};
@@ -131,7 +141,7 @@ protected:
 
   // The index of this EdgeInfo in the tile
   uint32_t index_in_tile_;
-  bool has_osmids_;
+  bool has_osmids_ = false;
 
   friend std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& id);
 };
