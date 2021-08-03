@@ -1536,6 +1536,7 @@ void TripLegBuilder::Build(
                     travel_type, costing, directededge, node->drive_on_right(), trip_node, graphtile,
                     time_info.second_of_week, startnode.id(), node->named_intersection(), start_tile,
                     edge_itr->restriction_index);
+    auto* trip_edge_osmids = trip_edge->mutable_osm_ids();
 
     // some information regarding shape/length trimming
     float trim_start_pct = is_first_edge ? start_pct : 0;
@@ -1544,13 +1545,26 @@ void TripLegBuilder::Build(
     // Process the shape for edges where a route discontinuity occurs
     uint32_t begin_index = is_first_edge ? 0 : trip_shape.size() - 1;
     auto edgeinfo = graphtile->edgeinfo(directededge);
-    if (edge_trimming && !edge_trimming->empty() && edge_trimming->count(edge_index) > 0) {
-      // Get edge shape and reverse it if directed edge is not forward.
-      auto edge_shape = edgeinfo.shape();
-      if (!directededge->forward()) {
-        std::reverse(edge_shape.begin(), edge_shape.end());
-      }
+    auto edge_shape_lls = edgeinfo.shape();
+    std::vector<PointLLAndOSMId> edge_shape(edge_shape_lls.size());
 
+    if (have_osmids) {
+      auto const osmids = start_tile->osmids_for_edge(edge);
+      assert(osmids.size() == edge_shape_lls.size());
+      std::transform(edge_shape_lls.begin(), edge_shape_lls.end(), osmids.begin(), edge_shape.begin(),
+                     [](PointLL const& ll, uint64_t oid) { return std::make_pair(ll, oid); });
+    } else {
+      std::transform(edge_shape_lls.begin(), edge_shape_lls.end(), edge_shape.begin(),
+                     [](PointLL const& ll) {
+                       return std::make_pair(ll, std::numeric_limits<uint64_t>::max());
+                     });
+    }
+
+    // Get edge shape and reverse it if directed edge is not forward.
+    if (!directededge->forward())
+      std::reverse(edge_shape.begin(), edge_shape.end());
+
+    if (edge_trimming && !edge_trimming->empty() && edge_trimming->count(edge_index) > 0) {
       // Grab the edge begin and end info
       auto& edge_begin_info = edge_trimming->at(edge_index).first;
       auto& edge_end_info = edge_trimming->at(edge_index).second;
@@ -1563,7 +1577,7 @@ void TripLegBuilder::Build(
       } // No trimming needed
       else if (!edge_begin_info.trim) {
         edge_begin_info.distance_along = 0;
-        edge_begin_info.vertex = edge_shape.front();
+        edge_begin_info.vertex = edge_shape.front().first;
       }
 
       // Handle partial shape for last edge
@@ -1574,7 +1588,7 @@ void TripLegBuilder::Build(
       } // No trimming needed
       else if (!edge_end_info.trim) {
         edge_end_info.distance_along = 1;
-        edge_end_info.vertex = edge_shape.back();
+        edge_end_info.vertex = edge_shape.back().first;
       }
 
       // Overwrite the trimming information for the edge length now that we know what it is
@@ -1588,8 +1602,21 @@ void TripLegBuilder::Build(
       // Add edge shape to the trip and skip the first point when its redundant with the previous edge
       // TODO: uncommment correct removal of redundant shape after odin can handle uturns
       // trip_shape.insert(trip_shape.end(), edge_shape.begin() + !is_first_edge, edge_shape.end());
-      trip_shape.insert(trip_shape.end(), edge_shape.begin() + !edge_begin_info.trim,
-                        edge_shape.end());
+
+      // copy the lat/lons back out
+      edge_shape_lls.resize(edge_shape.size());
+      std::transform(edge_shape.begin(), edge_shape.end(), edge_shape_lls.begin(),
+                     [](PointLLAndOSMId const& lli) { return lli.first; });
+
+      // keep the shape
+      trip_shape.insert(trip_shape.end(), edge_shape_lls.begin() + !edge_begin_info.trim,
+                        edge_shape_lls.end());
+
+      // keep the OSM ids
+      if (have_osmids) {
+        std::for_each(edge_shape.begin() + !edge_begin_info.trim, edge_shape.end(),
+                      [&](PointLLAndOSMId const& lli) { trip_edge_osmids->Add(lli.second); });
+      }
 
       // If edge_begin_info.trim and is not the first edge then increment begin_index since
       // the previous end shape index should not equal the current begin shape index because
@@ -1599,30 +1626,44 @@ void TripLegBuilder::Build(
       }
     } // We need to clip the shape if its at the beginning or end
     else if (is_first_edge || is_last_edge) {
-      // Get edge shape and reverse it if directed edge is not forward.
-      auto edge_shape = edgeinfo.shape();
-      if (!directededge->forward()) {
-        std::reverse(edge_shape.begin(), edge_shape.end());
-      }
       float total = static_cast<float>(directededge->length());
       // Trim both ways
       if (is_first_edge && is_last_edge) {
         trim_shape(start_pct * total, start_vrt, end_pct * total, end_vrt, edge_shape);
       } // Trim the shape at the front for the first edge
       else if (is_first_edge) {
-        trim_shape(start_pct * total, start_vrt, total, edge_shape.back(), edge_shape);
+        trim_shape(start_pct * total, start_vrt, total, edge_shape.back().first, edge_shape);
       } // And at the back if its the last edge
       else {
-        trim_shape(0, edge_shape.front(), end_pct * total, end_vrt, edge_shape);
+        trim_shape(0, edge_shape.front().first, end_pct * total, end_vrt, edge_shape);
       }
-      // Keep the shape
-      trip_shape.insert(trip_shape.end(), edge_shape.begin() + !is_first_edge, edge_shape.end());
+      // copy the lat/lons back out
+      edge_shape_lls.resize(edge_shape.size());
+      std::transform(edge_shape.begin(), edge_shape.end(), edge_shape_lls.begin(),
+                     [](PointLLAndOSMId const& lli) { return lli.first; });
+
+      // keep the shape
+      trip_shape.insert(trip_shape.end(), edge_shape_lls.begin() + !is_first_edge,
+                        edge_shape_lls.end());
+
+      // keep the OSM ids
+      if (have_osmids) {
+        std::for_each(edge_shape.begin() + !is_first_edge, edge_shape.end(),
+                      [&](PointLLAndOSMId const& lli) { trip_edge_osmids->Add(lli.second); });
+      }
     } // Just get the shape in there in the right direction no clipping needed
     else {
-      if (directededge->forward()) {
-        trip_shape.insert(trip_shape.end(), edgeinfo.shape().begin() + 1, edgeinfo.shape().end());
-      } else {
-        trip_shape.insert(trip_shape.end(), edgeinfo.shape().rbegin() + 1, edgeinfo.shape().rend());
+      // copy the lat/lons back out
+      std::transform(edge_shape.begin(), edge_shape.end(), edge_shape_lls.begin(),
+                     [](PointLLAndOSMId const& lli) { return lli.first; });
+
+      // keep the shape
+      trip_shape.insert(trip_shape.end(), edge_shape_lls.begin() + 1, edge_shape_lls.end());
+
+      // keep the OSM ids
+      if (have_osmids) {
+        std::for_each(edge_shape.begin() + 1, edge_shape.end(),
+                      [&](PointLLAndOSMId const& lli) { trip_edge_osmids->Add(lli.second); });
       }
     }
 

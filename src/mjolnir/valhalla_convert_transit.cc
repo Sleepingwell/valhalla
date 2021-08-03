@@ -655,6 +655,11 @@ void AddToGraph(GraphTileBuilder& tilebuilder_transit,
         uint32_t edge_info_offset =
             tilebuilder_transit.AddEdgeInfo(0, egress_graphid, station_graphid, 0, 0, 0, 0, shape,
                                             names, tagged_names, 0, added);
+        if (added && tilebuilder_transit.has_osmids()) {
+          // TODO: Check more thorourghly that these are not actual OSM nodes
+          //  ... which would have real OSM ids.
+          tilebuilder_transit.set_faux_osmids_for_last_edge(shape.size());
+        }
         directededge.set_edgeinfo_offset(edge_info_offset);
         directededge.set_forward(true);
 
@@ -704,6 +709,11 @@ void AddToGraph(GraphTileBuilder& tilebuilder_transit,
         uint32_t edge_info_offset =
             tilebuilder_transit.AddEdgeInfo(0, station_graphid, egress_graphid, 0, 0, 0, 0, shape,
                                             names, tagged_names, 0, added);
+        if (added && tilebuilder_transit.has_osmids()) {
+          // TODO: Check more thorourghly that these are not actual OSM nodes
+          //  ... which would have real OSM ids.
+          tilebuilder_transit.set_faux_osmids_for_last_edge(shape.size());
+        }
         directededge.set_edgeinfo_offset(edge_info_offset);
         directededge.set_forward(true);
 
@@ -761,6 +771,11 @@ void AddToGraph(GraphTileBuilder& tilebuilder_transit,
         uint32_t edge_info_offset =
             tilebuilder_transit.AddEdgeInfo(0, station_graphid, platform_graphid, 0, 0, 0, 0, shape,
                                             names, tagged_names, 0, added);
+        if (added && tilebuilder_transit.has_osmids()) {
+          // TODO: Check more thorourghly that these are not actual OSM nodes
+          //  ... which would have real OSM ids.
+          tilebuilder_transit.set_faux_osmids_for_last_edge(shape.size());
+        }
         directededge.set_edgeinfo_offset(edge_info_offset);
         directededge.set_forward(true);
 
@@ -839,6 +854,11 @@ void AddToGraph(GraphTileBuilder& tilebuilder_transit,
     uint32_t edge_info_offset =
         tilebuilder_transit.AddEdgeInfo(0, platform_graphid, station_graphid, 0, 0, 0, 0, shape,
                                         names, tagged_names, 0, added);
+    if (added && tilebuilder_transit.has_osmids()) {
+      // TODO: Check more thorourghly that these are not actual OSM nodes
+      //  ... which would have real OSM ids.
+      tilebuilder_transit.set_faux_osmids_for_last_edge(shape.size());
+    }
     directededge.set_edgeinfo_offset(edge_info_offset);
     directededge.set_forward(true);
 
@@ -929,6 +949,11 @@ void AddToGraph(GraphTileBuilder& tilebuilder_transit,
       uint32_t edge_info_offset =
           tilebuilder_transit.AddEdgeInfo(transitedge.routeid, platform_graphid, endnode, 0, 0, 0, 0,
                                           shape, names, tagged_names, 0, added);
+      if (added && tilebuilder_transit.has_osmids()) {
+        // TODO: Check more thorourghly that these are not actual OSM nodes
+        //  ... which would have real OSM ids.
+        tilebuilder_transit.set_faux_osmids_for_last_edge(shape.size());
+      }
       directededge.set_edgeinfo_offset(edge_info_offset);
       directededge.set_forward(added);
 

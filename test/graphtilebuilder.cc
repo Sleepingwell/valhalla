@@ -111,11 +111,21 @@ TEST(GraphTileBuilder, TestDuplicateEdgeInfo) {
   bool added = false;
   test.AddEdgeInfo(0, GraphId(0, 2, 0), GraphId(0, 2, 1), 1234, 555, 0, 120,
                    std::list<PointLL>{{0, 0}, {1, 1}}, {"einzelweg"}, {"1xyz tunnel"}, 0, added);
+  if (added && test.has_osmids()) {
+    // TODO: Check more thorourghly that these are not actual OSM nodes
+    //  ... which would have real OSM ids.
+    test.set_faux_osmids_for_last_edge(2);
+  }
   EXPECT_EQ(test.edge_offset_map_.size(), 1) << "There should be exactly two of these in here";
 
   // add edge info for node 1 to node 0
   test.AddEdgeInfo(0, GraphId(0, 2, 1), GraphId(0, 2, 0), 1234, 555, 0, 120,
                    std::list<PointLL>{{1, 1}, {0, 0}}, {"einzelweg"}, {"1xyz tunnel"}, 0, added);
+  if (added && test.has_osmids()) {
+    // TODO: Check more thorourghly that these are not actual OSM nodes
+    //  ... which would have real OSM ids.
+    test.set_faux_osmids_for_last_edge(2);
+  }
   EXPECT_EQ(test.edge_offset_map_.size(), 1) << "There should still be exactly two of these in here";
 
   test.StoreTileData();

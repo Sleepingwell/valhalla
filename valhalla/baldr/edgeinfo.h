@@ -115,6 +115,14 @@ public:
   }
 
   /**
+   * Gets the index of this EdgeInfo within the tile.
+   * @return  Returns the index of this EdgeInfo within the tile.
+   */
+  uint32_t index_in_tile() const {
+    return index_in_tile_;
+  }
+
+  /**
    * Get the number of names.
    * @return Returns the name count.
    */
@@ -229,6 +237,9 @@ protected:
 
   // The size of the names list
   size_t names_list_length_;
+
+  // The index of this EdgeInfo in the tile
+  size_t index_in_tile_;
 };
 
 } // namespace baldr

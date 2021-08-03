@@ -199,6 +199,11 @@ void ConnectToGraph(GraphTileBuilder& tilebuilder_local,
       uint32_t edge_info_offset =
           tilebuilder_local.AddEdgeInfo(0, conn.osm_node, endnode, conn.wayid, 0, 0, 0, conn.shape,
                                         conn.names, conn.tagged_names, 0, added);
+      if (added && tilebuilder_local.has_osmids()) {
+        // TODO: Check more thorourghly that these are not actual OSM nodes
+        //  ... which would have real OSM ids.
+        tilebuilder_local.set_faux_osmids_for_last_edge(conn.shape.size());
+      }
       directededge.set_edgeinfo_offset(edge_info_offset);
       directededge.set_forward(true);
       tilebuilder_local.directededges().emplace_back(std::move(directededge));
@@ -314,6 +319,11 @@ void ConnectToGraph(GraphTileBuilder& tilebuilder_local,
             tilebuilder_transit.AddEdgeInfo(0, origin_node, conn.osm_node, conn.wayid, 0, 0, 0,
                                             r_shape, conn.names, conn.tagged_names, 0, added);
         LOG_DEBUG("Add conn from stop to OSM: ei offset = " + std::to_string(edge_info_offset));
+        if (added && tilebuilder_transit.has_osmids()) {
+          // TODO: Check more thorourghly that these are not actual OSM nodes
+          //  ... which would have real OSM ids.
+          tilebuilder_transit.set_faux_osmids_for_last_edge(r_shape.size());
+        }
         directededge.set_edgeinfo_offset(edge_info_offset);
         directededge.set_forward(true);
 

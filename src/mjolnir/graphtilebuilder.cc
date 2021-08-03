@@ -151,6 +151,15 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
     osmids_for_nodes_.resize(header_->nodecount());
     std::copy(GraphTile::osmids_for_nodes_, GraphTile::osmids_for_nodes_ + header_->nodecount(),
               osmids_for_nodes_.begin());
+    osmids_for_edges_.resize(header_->osmidcount());
+    std::copy(GraphTile::osmids_for_edges_, GraphTile::osmids_for_edges_ + header_->osmidcount(),
+              osmids_for_edges_.begin());
+    osmid_edge_indexes_.resize(header_->edgeinfocount());
+    std::copy(GraphTile::osmid_edge_indexes_,
+              GraphTile::osmid_edge_indexes_ + header_->edgeinfocount(), osmid_edge_indexes_.begin());
+    osmid_edge_lengths_.resize(header_->edgeinfocount());
+    std::copy(GraphTile::osmid_edge_lengths_,
+              GraphTile::osmid_edge_lengths_ + header_->edgeinfocount(), osmid_edge_lengths_.begin());
   }
 
   // Edge bins are gotten by parent
@@ -192,6 +201,10 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
       eib.AddNameInfo(info);
     }
     eib.set_encoded_shape(ei.encoded_shape());
+    eib.set_has_osmids(has_osmids());
+    if (has_osmids()) {
+      eib.set_index_in_tile(ei.index_in_tile());
+    }
     edge_info_offset_ += eib.SizeOf();
     edgeinfo_list_.emplace_back(std::move(eib));
 
@@ -319,6 +332,7 @@ void GraphTileBuilder::StoreTileData() {
 
     header_builder_.set_has_osmids(has_osmids());
     if (has_osmids()) {
+      header_builder_.set_edgeinfocount(edgeinfo_list_.size());
       if (osmids_for_nodes_.size() != nodes_builder_.size()) {
         throw std::runtime_error(std::string("length of osmids does not equal length of nodes: ") +
                                  std::to_string(osmids_for_nodes_.size()) +
@@ -326,6 +340,17 @@ void GraphTileBuilder::StoreTileData() {
       }
       in_mem.write(reinterpret_cast<const char*>(osmids_for_nodes_.data()),
                    osmids_for_nodes_.size() * sizeof(uint64_t));
+      assert(osmid_edge_indexes_.size() == edgeinfo_list_.size());
+      assert(osmid_edge_lengths_.size() == edgeinfo_list_.size());
+      assert(std::accumulate(osmid_edge_lengths_.begin(), osmid_edge_lengths_.end(), 0u) ==
+             osmids_for_edges_.size());
+      header_builder_.set_osmidcount(osmids_for_edges_.size());
+      in_mem.write(reinterpret_cast<const char*>(osmids_for_edges_.data()),
+                   osmids_for_edges_.size() * sizeof(uint64_t));
+      in_mem.write(reinterpret_cast<const char*>(osmid_edge_indexes_.data()),
+                   osmid_edge_indexes_.size() * sizeof(uint32_t));
+      in_mem.write(reinterpret_cast<const char*>(osmid_edge_lengths_.data()),
+                   osmid_edge_lengths_.size() * sizeof(uint16_t));
     } else {
       // TODO: Should this be an assert?
       // runtime error because we depend on the length in setting the next offset,
@@ -334,6 +359,10 @@ void GraphTileBuilder::StoreTileData() {
         throw std::runtime_error(std::string("length of osmids should be zero, not ") +
                                  std::to_string(osmids_for_nodes_.size()));
       }
+      assert(osmids_for_edges_.size() == 0u);
+      assert(osmid_edge_indexes_.size() == 0u);
+      assert(osmid_edge_lengths_.size() == 0u);
+      header_builder_.set_osmidcount(0u);
     }
 
     // Edge bins can only be added after you've stored the tile
@@ -351,7 +380,10 @@ void GraphTileBuilder::StoreTileData() {
         (schedule_builder_.size() * sizeof(TransitSchedule)) +
         // TODO - once transit transfers are added need to update here
         (signs_builder_.size() * sizeof(Sign)) + (turnlanes_builder_.size() * sizeof(TurnLanes)) +
-        (admins_builder_.size() * sizeof(Admin)) + (osmids_for_nodes_.size() * sizeof(uint64_t)));
+        (admins_builder_.size() * sizeof(Admin)) + (osmids_for_nodes_.size() * sizeof(uint64_t)) +
+        (osmids_for_edges_.size() * sizeof(uint64_t)) +
+        (osmid_edge_indexes_.size() * sizeof(uint32_t)) +
+        (osmid_edge_lengths_.size() * sizeof(uint16_t)));
     uint32_t forward_restriction_size = 0;
     for (auto& complex_restriction : complex_restriction_forward_builder_) {
       in_mem << complex_restriction;
@@ -370,7 +402,11 @@ void GraphTileBuilder::StoreTileData() {
     // Write the edge data
     header_builder_.set_edgeinfo_offset(header_builder_.complex_restriction_reverse_offset() +
                                         reverse_restriction_size);
-    for (const auto& edgeinfo : edgeinfo_list_) {
+    uint32_t index_in_tile = 0;
+    for (auto& edgeinfo : edgeinfo_list_) {
+      if (has_osmids()) {
+        edgeinfo.set_index_in_tile(index_in_tile++);
+      }
       in_mem << edgeinfo;
     }
 
@@ -591,6 +627,7 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_bike_network(bike_network);
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_shape(lls);
+    edgeinfo.set_has_osmids(has_osmids());
 
     // Add names to the common text/name list. Skip blank names.
     std::vector<NameInfo> name_info_list;
@@ -707,6 +744,7 @@ uint32_t GraphTileBuilder::AddEdgeInfo(const uint32_t edgeindex,
     edgeinfo.set_bike_network(bike_network);
     edgeinfo.set_speed_limit(speed_limit);
     edgeinfo.set_encoded_shape(llstr);
+    edgeinfo.set_has_osmids(has_osmids());
 
     // Add names to the common text/name list. Skip blank names.
     std::vector<NameInfo> name_info_list;

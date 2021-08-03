@@ -91,6 +91,18 @@ public:
   void set_encoded_shape(const std::string& encoded_shape);
 
   /**
+   * Set the index of this EdginfoBuilder within the tile.
+   * @return  Returns index of this EdginfoBuilder within the tile.
+   */
+  void set_index_in_tile(const uint32_t idx) {
+    index_in_tile_ = idx;
+  }
+
+  void set_has_osmids(const bool state) {
+    has_osmids_ = state;
+  }
+
+  /**
    * Get the size of this edge info (without padding).
    * @return  Returns the size in bytes of this object.
    */
@@ -116,6 +128,10 @@ protected:
 
   // Lat,lng shape of the edge
   std::string encoded_shape_;
+
+  // The index of this EdgeInfo in the tile
+  uint32_t index_in_tile_;
+  bool has_osmids_;
 
   friend std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& id);
 };

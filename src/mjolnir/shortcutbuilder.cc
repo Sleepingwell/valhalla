@@ -492,6 +492,11 @@ uint32_t AddShortcutEdges(GraphReader& reader,
           tilebuilder.AddEdgeInfo(idx, start_node, end_node, 0, 0, edgeinfo.bike_network(),
                                   edgeinfo.speed_limit(), shape, names, tagged_names, types, forward,
                                   diff_names);
+      if (forward && tilebuilder.has_osmids()) {
+        // TODO: Check more thorourghly that these are not actual OSM nodes
+        //  ... which would have real OSM ids.
+        tilebuilder.set_faux_osmids_for_last_edge(shape.size());
+      }
       newedge.set_edgeinfo_offset(edge_info_offset);
 
       // Set the forward flag on this directed edge. If a new edge was added
@@ -683,6 +688,12 @@ uint32_t FormShortcuts(GraphReader& reader, const TileLevel& level, const bool i
                                     edgeinfo.bike_network(), edgeinfo.speed_limit(),
                                     edgeinfo.encoded_shape(), edgeinfo.GetNames(),
                                     edgeinfo.GetNames(true), edgeinfo.GetTypes(), added);
+        if (added && tilebuilder.has_osmids()) {
+          // TODO: Workout if this is dangerous.
+          // Is it possible that we then refer to directed edges added to the tile builder (but not to
+          // the tile) before they are written to the tile
+          tilebuilder.set_last_edge_osmids(tile->osmids_for_edge(directededge));
+        }
         newedge.set_edgeinfo_offset(edge_info_offset);
 
         // Set the superseded mask - this is the shortcut mask that supersedes this edge

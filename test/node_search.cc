@@ -261,6 +261,11 @@ void graph_builder::write_tiles(uint8_t level) const {
       // combination doesnt properly handle arcs but who cares
       edge_info_offset = tile.AddEdgeInfo(edge_index, e.first, e.second, 123, 456, 0, 55, shape,
                                           {std::to_string(edge_index)}, {}, 0, add);
+      if (add && tile.has_osmids()) {
+        // TODO: Check more thorourghly that these are not actual OSM nodes
+        //  ... which would have real OSM ids.
+        tile.set_faux_osmids_for_last_edge(shape.size());
+      }
     }
     edge_builder.set_edgeinfo_offset(edge_info_offset);
 

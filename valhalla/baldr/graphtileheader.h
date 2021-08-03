@@ -17,7 +17,7 @@ namespace baldr {
 // something to the tile simply subtract one from this number and add it
 // just before the empty_slots_ array below. NOTE that it can ONLY be an
 // offset in bytes and NOT a bitfield or union or anything of that sort
-constexpr size_t kEmptySlots = 11;
+constexpr size_t kEmptySlots = 9;
 
 // Maximum size of the version string (stored as a fixed size
 // character array so the GraphTileHeader size remains fixed).
@@ -233,6 +233,22 @@ public:
   }
 
   /**
+   * Gets the number of OSM ids in this tile.
+   * @return Returns the number of OSM ids.
+   */
+  uint32_t osmidcount() const {
+    return osmidcount_;
+  }
+
+  /**
+   * Sets the number of OSM ids for the edges contained in this tile.
+   * @param  count  Number of OSM ids for the edges contained in this tile.
+   */
+  void set_osmidcount(const uint32_t count) {
+    osmidcount_ = count;
+  }
+
+  /**
    * Does the tile contain OSM ids?
    * @return \c true if it does and \c false otherwise.
    */
@@ -246,6 +262,22 @@ public:
    */
   void set_has_osmids(const bool state) {
     has_osmids_ = state;
+  }
+
+  /**
+   * Gets the number of EdgeInfo instances in this tile.
+   * @return Returns the number of EdgeInfo instances.
+   */
+  uint32_t edgeinfocount() const {
+    return edgeinfocount_;
+  }
+
+  /**
+   * Sets the number of nodes in this tile. Error occurs if the count is greater than kMaxGraphId.
+   * @param  count  Number of nodes within the tile.
+   */
+  void set_edgeinfocount(const uint32_t count) {
+    edgeinfocount_ = count;
   }
 
   /**
@@ -702,6 +734,9 @@ protected:
 
   // GraphTile data size in bytes
   uint32_t tile_size_;
+
+  uint32_t osmidcount_;    // the number of OSM ids in this tile
+  uint32_t edgeinfocount_; // the number of edgeinfos this tile
 
   // Marks the end of this version of the tile with the rest of the slots
   // being available for growth. If you want to use one of the empty slots,

@@ -53,6 +53,8 @@ EdgeInfo::EdgeInfo(char* ptr, const char* names_list, const size_t names_list_le
     extended_wayid3_ = static_cast<uint8_t>(*ptr);
     ptr += sizeof(uint8_t);
   }
+  // note that this may not be valids, but we check before we access it.
+  index_in_tile_ = static_cast<uint32_t>(*ptr);
 }
 
 EdgeInfo::~EdgeInfo() {

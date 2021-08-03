@@ -305,6 +305,9 @@ void add_bss_nodes_and_edges(GraphTileBuilder& tilebuilder_local,
                                         new_bss_node_graphid, bss_to_waynode.way_node_id,
                                         bss_to_waynode.wayid, 0, 0, 0, bss_to_waynode.shape,
                                         bss_to_waynode.names, bss_to_waynode.tagged_names, 0, added);
+      if (added && tilebuilder_local.has_osmids()) {
+        tilebuilder_local.set_faux_osmids_for_last_edge(bss_to_waynode.shape.size());
+      }
       directededge.set_edgeinfo_offset(edge_info_offset);
       tilebuilder_local.directededges().emplace_back(std::move(directededge));
     }
@@ -444,6 +447,11 @@ void create_edges(GraphTileBuilder& tilebuilder_local,
           tilebuilder_local.AddEdgeInfo(tilebuilder_local.directededges().size(), lower->way_node_id,
                                         lower->bss_node_id, lower->wayid, 0, 0, 0, lower->shape,
                                         lower->names, lower->tagged_names, 0, added);
+      if (added && tilebuilder_local.has_osmids()) {
+        // TODO: Check more thorourghly that these are not actual OSM nodes
+        //  ... which would have real OSM ids.
+        tilebuilder_local.set_faux_osmids_for_last_edge(lower->shape.size());
+      }
       directededge.set_edgeinfo_offset(edge_info_offset);
 
       tilebuilder_local.directededges().emplace_back(std::move(directededge));

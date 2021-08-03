@@ -82,6 +82,12 @@ public:
    */
   std::vector<NodeInfo>& nodes();
 
+  ///**
+  // * Get the current list of osmids.
+  // * @return  Returns the list of osmids.
+  // */
+  // std::vector<uint64_t>& osmids();
+
   /**
    * Gets the current list of directed edge (builders).
    * @return  Returns the directed edge builders.
@@ -266,6 +272,29 @@ public:
     } else {
       LOG_WARN("Setting OSM id on builder with has_osmids() == false ignored");
     }
+  }
+
+  /**
+   * Set the OSM ids for the most recently added edge.
+   * @param ids  The ids for the most recently added edge.
+   */
+  template <typename C> void set_last_edge_osmids(const C& ids) {
+    assert(edgeinfo_list_.back().shape_size() == ids.size());
+    osmid_edge_indexes_.push_back(osmids_for_edges_.size());
+    osmid_edge_lengths_.push_back(ids.size());
+    this->osmids_for_edges_.insert(osmids_for_edges_.end(), ids.begin(), ids.end());
+  }
+
+  /**
+   * Set faux OSM ids for the most recently added edge.
+   * @param n  The number of faux ids to add for the edge (should be the the same as the length of
+   * the shape for the most recently added edge.
+   */
+  void set_faux_osmids_for_last_edge(const size_t n) {
+    assert(edgeinfo_list_.back().shape_size() == n);
+    osmid_edge_indexes_.push_back(osmids_for_edges_.size());
+    osmid_edge_lengths_.push_back(static_cast<uint32_t>(n));
+    this->osmids_for_edges_.insert(osmids_for_edges_.end(), n, std::numeric_limits<u_int64_t>::max());
   }
 
   /**
@@ -506,6 +535,10 @@ protected:
 
   // List of OSM ids for the nodes
   std::vector<uint64_t> osmids_for_nodes_;
+  // List of OSM ids for the edges
+  std::vector<uint64_t> osmids_for_edges_;
+  std::vector<uint32_t> osmid_edge_indexes_;
+  std::vector<uint16_t> osmid_edge_lengths_;
 
   // List of directed edges. This is a fixed size structure so it can be
   // indexed directly.

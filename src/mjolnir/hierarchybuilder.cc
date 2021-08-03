@@ -327,6 +327,12 @@ void FormTilesInNewLevel(GraphReader& reader,
                                    edgeinfo.bike_network(), edgeinfo.speed_limit(), encoded_shape,
                                    edgeinfo.GetNames(), edgeinfo.GetNames(true), edgeinfo.GetTypes(),
                                    added, diff_names);
+      if (added && tilebuilder->has_osmids()) {
+        // TODO: Workout if this is dangerous.
+        // Is it possible that we then refer to directed edges added to the tile builder (but not to
+        // the tile) before they are written to the tile
+        tilebuilder->set_last_edge_osmids(tile->osmids_for_edge(directededge));
+      }
       newedge.set_edgeinfo_offset(edge_info_offset);
 
       // Add directed edge

@@ -320,6 +320,12 @@ void GraphTile::Initialize(const GraphId& graphid) {
   if (header_->has_osmids()) {
     osmids_for_nodes_ = reinterpret_cast<uint64_t*>(ptr);
     ptr += header_->nodecount() * sizeof(uint64_t);
+    osmids_for_edges_ = reinterpret_cast<uint64_t*>(ptr);
+    ptr += header_->osmidcount() * sizeof(uint64_t);
+    osmid_edge_indexes_ = reinterpret_cast<uint32_t*>(ptr);
+    ptr += header_->edgeinfocount() * sizeof(uint32_t);
+    osmid_edge_lengths_ = reinterpret_cast<uint16_t*>(ptr);
+    ptr += header_->edgeinfocount() * sizeof(uint16_t);
   }
 
   // Set a pointer to the edge bin list

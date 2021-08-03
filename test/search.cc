@@ -100,6 +100,11 @@ void make_tile() {
                                                  0, 0,
                                                  120, // speed limit in kph
                                                  shape, {std::to_string(localedgeidx)}, {}, 0, added);
+    if (added && tile.has_osmids()) {
+      // TODO: Check more thorourghly that these are not actual OSM nodes
+      //  ... which would have real OSM ids.
+      tile.set_faux_osmids_for_last_edge(shape.size());
+    }
     // assert(added);
     edge_builder.set_edgeinfo_offset(edge_info_offset);
     tile.directededges().emplace_back(edge_builder);

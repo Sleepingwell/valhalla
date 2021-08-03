@@ -86,6 +86,9 @@ std::size_t EdgeInfoBuilder::BaseSizeOf() const {
   size += (name_info_list_.size() * sizeof(NameInfo));
   size += (encoded_shape_.size() * sizeof(std::string::value_type));
   size += ei_.extended_wayid_size_;
+  if (has_osmids_) {
+    size += sizeof(index_in_tile_);
+  }
   return size;
 }
 
@@ -130,6 +133,9 @@ std::ostream& operator<<(std::ostream& os, const EdgeInfoBuilder& eib) {
   }
   if (ei.extended_wayid_size_ > 1) {
     os.write(reinterpret_cast<const char*>(&eib.extended_wayid3_), sizeof(eib.extended_wayid3_));
+  }
+  if (eib.has_osmids_) {
+    os.write(reinterpret_cast<const char*>(&eib.index_in_tile_), sizeof(eib.index_in_tile_));
   }
 
   // Pad to a 4 byte boundary

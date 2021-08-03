@@ -209,6 +209,43 @@ public:
   }
 
   /**
+   * Get an OSM id for a directed edge.
+   * @param node The GraphId of the directed edge.
+   * @return  Returns the OSM id for the directed edge.
+   */
+  std::vector<uint64_t> osmids_for_edge(const GraphId& edge) const {
+    assert(edge.Tile_Base() == header_->graphid().Tile_Base());
+    return osmids_for_edge(directededge(edge));
+  }
+
+  /**
+   * Get an OSM id for a directed edge.
+   * @param edge The directed edge.
+   * @return  Returns the OSM id for the directed edge.
+   */
+  std::vector<uint64_t> osmids_for_edge(const DirectedEdge* edge) const {
+    assert(has_osmids());
+    return osmids_for_edge(static_cast<size_t>(edgeinfo(edge).index_in_tile()));
+  }
+
+  /**
+   * Get the OSM ids corresponding to an edge id.
+   * @param  idx  Index of the edge info within the current tile.
+   * @return  Returns the OSM id.
+   */
+  std::vector<uint64_t> osmids_for_edge(const size_t idx) const {
+    assert(has_osmids());
+    if (idx < header_->edgeinfocount()) {
+      auto* begin = osmids_for_edges_ + osmid_edge_indexes_[idx];
+      return std::vector<uint64_t>{begin, begin + osmid_edge_lengths_[idx]};
+    }
+    throw std::runtime_error(
+        "GraphTile EdgeInfo index out of bounds: " + std::to_string(header_->graphid().tileid()) +
+        "," + std::to_string(header_->graphid().level()) + "," + std::to_string(idx) +
+        " nodinfocount= " + std::to_string(header_->edgeinfocount()));
+  }
+
+  /**
    * Does this tile contain OSM ids?
    * @return Return \c true if this tile contains OSM ids and \c false otherwise.
    */
@@ -522,7 +559,6 @@ public:
    */
   std::vector<AccessRestriction> GetAccessRestrictions(const uint32_t edgeid,
                                                        const uint32_t access) const;
-
   /**
    * Get an iteratable list of GraphIds given a bin in the tile
    * @param  column the bin's column
@@ -758,6 +794,11 @@ protected:
 
   // OSM ids for nodes
   uint64_t* osmids_for_nodes_{};
+
+  // OSM ids and index/lengths for edges.
+  uint64_t* osmids_for_edges_{nullptr};
+  uint32_t* osmid_edge_indexes_{nullptr};
+  uint16_t* osmid_edge_lengths_{nullptr};
 
   // List of complex_restrictions in the forward direction.
   char* complex_restriction_forward_{};
