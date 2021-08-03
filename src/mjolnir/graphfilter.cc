@@ -43,7 +43,8 @@ void FilterTiles(GraphReader& reader,
                  std::unordered_map<GraphId, GraphId>& old_to_new,
                  const bool include_driving,
                  const bool include_bicycle,
-                 const bool include_pedestrian) {
+                 const bool include_pedestrian,
+                 const bool include_osmids) {
 
   // lambda to check if an edge should be included
   auto include_edge = [&include_driving, &include_bicycle,
@@ -63,7 +64,7 @@ void FilterTiles(GraphReader& reader,
   auto local_tiles = reader.GetTileSet(TileHierarchy::levels().back().level);
   for (const auto& tile_id : local_tiles) {
     // Create a new tilebuilder - should copy header information
-    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false);
+    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false, include_osmids);
     n_original_nodes += tilebuilder.header()->nodecount();
     n_original_edges += tilebuilder.header()->directededgecount();
 
@@ -221,7 +222,9 @@ void FilterTiles(GraphReader& reader,
  * @param  reader  Graph reader.
  * @param  old_to_new  Map of original node Ids to new nodes Ids (after filtering).
  */
-void UpdateEndNodes(GraphReader& reader, std::unordered_map<GraphId, GraphId>& old_to_new) {
+void UpdateEndNodes(GraphReader& reader,
+                    std::unordered_map<GraphId, GraphId>& old_to_new,
+                    const bool include_osmids) {
   LOG_INFO("Update end nodes of directed edges");
 
   int found = 0;
@@ -234,7 +237,7 @@ void UpdateEndNodes(GraphReader& reader, std::unordered_map<GraphId, GraphId>& o
     assert(tile);
 
     // Create a new tilebuilder - should copy header information
-    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false);
+    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false, include_osmids);
 
     // Copy nodes (they do not change)
     std::vector<NodeInfo> nodes;
@@ -308,16 +311,18 @@ void GraphFilter::Filter(const boost::property_tree::ptree& pt) {
 
   // Construct GraphReader
   GraphReader reader(pt.get_child("mjolnir"));
+  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
 
   // Filter edges (and nodes) by access
-  FilterTiles(reader, old_to_new, include_driving, include_bicycle, include_pedestrian);
+  FilterTiles(reader, old_to_new, include_driving, include_bicycle, include_pedestrian,
+              include_osmids);
 
   // TODO - aggregate / combine edges across false nodes (only 2 directed edges)
   // where way Ids are equal
 
   // Update end nodes. Clear the GraphReader cache first.
   reader.Clear();
-  UpdateEndNodes(reader, old_to_new);
+  UpdateEndNodes(reader, old_to_new, include_osmids);
 
   LOG_INFO("Done GraphFilter");
 }

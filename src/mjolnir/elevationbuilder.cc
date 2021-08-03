@@ -44,6 +44,7 @@ void add_elevation(const boost::property_tree::ptree& pt,
                    std::promise<uint32_t>& /*result*/) {
   // Local Graphreader
   GraphReader graphreader(pt.get_child("mjolnir"));
+  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
 
   // We usually end up accessing the same shape twice (once for each direction along an edge).
   // Use a cache to record elevation attributes based on the EdgeInfo offset. This includes
@@ -64,7 +65,7 @@ void add_elevation(const boost::property_tree::ptree& pt,
     lock.unlock();
 
     // Get the tile. Serialize the entire tile?
-    GraphTileBuilder tilebuilder(graphreader.tile_dir(), tile_id, true);
+    GraphTileBuilder tilebuilder(graphreader.tile_dir(), tile_id, true, include_osmids);
 
     // Set the has_elevation flag. TODO - do we need to know if any elevation is actually
     // retrieved/used?

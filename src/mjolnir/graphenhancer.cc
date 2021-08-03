@@ -1240,6 +1240,7 @@ void enhance(const boost::property_tree::ptree& pt,
   bool apply_country_overrides = pt.get<bool>("data_processing.apply_country_overrides", true);
   bool use_urban_tag = pt.get<bool>("data_processing.use_urban_tag", false);
   bool use_admin_db = pt.get<bool>("data_processing.use_admin_db", true);
+  bool include_osmids = pt.get<bool>("include_osmids", false);
 
   // Initialize the admin DB (if it exists)
   sqlite3* admin_db_handle = (database && use_admin_db) ? GetDBHandle(*database) : nullptr;
@@ -1286,7 +1287,8 @@ void enhance(const boost::property_tree::ptree& pt,
     }
 
     // Tile builder - serialize in existing tile so we can add admin names
-    graph_tile_builder_ptr tilebuilder{new GraphTileBuilder(reader.tile_dir(), tile_id, true, false)};
+    graph_tile_builder_ptr tilebuilder{
+        new GraphTileBuilder(reader.tile_dir(), tile_id, true, include_osmids, false)};
     lock.unlock();
 
     // this will be our updated list of restrictions.

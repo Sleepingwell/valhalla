@@ -563,9 +563,11 @@ void customize_historical_traffic(const boost::property_tree::ptree& config,
                                   const HistoricalTrafficCustomize& cb) {
   // loop over all tiles in the tileset
   valhalla::baldr::GraphReader reader(config.get_child("mjolnir"));
+  bool include_osmids = config.get<bool>("mjolnir.include_osmids", false);
+
   auto tile_dir = config.get<std::string>("mjolnir.tile_dir");
   for (const auto& tile_id : reader.GetTileSet()) {
-    valhalla::mjolnir::GraphTileBuilder tile(tile_dir, tile_id, false);
+    valhalla::mjolnir::GraphTileBuilder tile(tile_dir, tile_id, false, include_osmids);
     std::vector<valhalla::baldr::DirectedEdge> edges;
     edges.reserve(tile.header()->directededgecount());
     for (const auto& edge : tile.GetDirectedEdges()) {
@@ -584,9 +586,11 @@ void customize_historical_traffic(const boost::property_tree::ptree& config,
 void customize_edges(const boost::property_tree::ptree& config, const EdgesCustomize& setter_cb) {
   // loop over all tiles in the tileset
   valhalla::baldr::GraphReader reader(config.get_child("mjolnir"));
+  bool include_osmids = config.get<bool>("mjolnir.include_osmids", false);
+
   auto tile_dir = config.get<std::string>("mjolnir.tile_dir");
   for (const auto& tile_id : reader.GetTileSet()) {
-    valhalla::mjolnir::GraphTileBuilder tile(tile_dir, tile_id, false);
+    valhalla::mjolnir::GraphTileBuilder tile(tile_dir, tile_id, false, include_osmids);
     std::vector<valhalla::baldr::NodeInfo> nodes;
     nodes.reserve(tile.header()->nodecount());
     for (const auto& node : tile.GetNodes())

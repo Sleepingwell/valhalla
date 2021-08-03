@@ -430,6 +430,8 @@ void BuildTileSet(const std::string& ways_file,
   bool added = false;
   DataQuality stats;
 
+  bool include_osmids = pt.get<bool>("include_osmids", false);
+
   // Lots of times in a given tile we may end up accessing the same
   // shape/attributes twice we avoid doing this by caching it here
   std::unordered_map<uint32_t, std::pair<double, uint32_t>> geo_attribute_cache;
@@ -440,7 +442,7 @@ void BuildTileSet(const std::string& ways_file,
     try {
       // What actually writes the tile
       GraphId tile_id = tile_start->first.Tile_Base();
-      GraphTileBuilder graphtile(tile_dir, tile_id, false);
+      GraphTileBuilder graphtile(tile_dir, tile_id, false, include_osmids, true);
 
       // Information about tile creation
       graphtile.AddTileCreationDate(tile_creation_date);

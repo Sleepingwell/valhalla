@@ -63,7 +63,9 @@ void assign(const boost::property_tree::ptree& config,
     std::vector<NodeInfo> nodes(tile->node(0), tile->node(0) + tile->header()->nodecount());
 
     // write the tile back out
-    GraphTileBuilder tilebuilder(config.get<std::string>("mjolnir.tile_dir"), tile_id, false);
+    bool include_osmids = config.get<bool>("mjolnir.include_osmids", false);
+    GraphTileBuilder tilebuilder(config.get<std::string>("mjolnir.tile_dir"), tile_id, false,
+                                 include_osmids);
     lock.lock();
     tilebuilder.Update(nodes, edges);
     if (graph_reader.OverCommitted()) {

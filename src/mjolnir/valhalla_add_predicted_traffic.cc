@@ -159,7 +159,8 @@ ParseTrafficFile(const std::vector<std::string>& filenames, stats& stat) {
 void update_tile(const std::string& tile_dir,
                  const GraphId& tile_id,
                  const std::unordered_map<uint32_t, TrafficSpeeds>& speeds,
-                 stats& stat) {
+                 stats& stat,
+                 const bool include_osmids) {
   auto tile_path = tile_dir + filesystem::path::preferred_separator + GraphTile::FileSuffix(tile_id);
   if (!filesystem::exists(tile_path)) {
     LOG_ERROR("No tile at " + tile_path);
@@ -167,7 +168,7 @@ void update_tile(const std::string& tile_dir,
   }
 
   // Get the tile
-  vj::GraphTileBuilder tile_builder(tile_dir, tile_id, false);
+  vj::GraphTileBuilder tile_builder(tile_dir, tile_id, false, include_osmids);
 
   // Get a count of how many predicted speed edges there will be this avoids reallocs
   size_t pred_count = 0;
@@ -215,7 +216,8 @@ void update_tiles(
     const std::string& tile_dir,
     std::vector<std::pair<GraphId, std::vector<std::string>>>::const_iterator tile_start,
     std::vector<std::pair<GraphId, std::vector<std::string>>>::const_iterator tile_end,
-    std::promise<stats>& result) {
+    std::promise<stats>& result,
+    const bool include_osmids) {
 
   std::stringstream thread_name;
   thread_name << std::this_thread::get_id();
@@ -228,7 +230,7 @@ void update_tiles(
     LOG_INFO(thread_name.str() + " parsing traffic data for " + std::to_string(tile_start->first));
     auto traffic = ParseTrafficFile(tile_start->second, stat);
     LOG_INFO(thread_name.str() + " add traffic data to " + std::to_string(tile_start->first));
-    update_tile(tile_dir, tile_start->first, traffic, stat);
+    update_tile(tile_dir, tile_start->first, traffic, stat, include_osmids);
     LOG_INFO(thread_name.str() + " finished " + std::to_string(tile_start->first) + "(" +
              std::to_string(++count / total * 100.0) + ")");
   }
@@ -336,9 +338,10 @@ int main(int argc, char** argv) {
                                  std::unordered_map<std::string, std::string>>(logging_subtree.get());
     valhalla::midgard::logging::Configure(logging_config);
   }
-
   LOG_INFO("Adding predicted traffic with " + std::to_string(num_threads) + " threads");
   std::vector<std::shared_ptr<std::thread>> threads(num_threads);
+
+  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
 
   LOG_INFO("Parsing speeds from " + std::to_string(traffic_tiles.size()) + " tiles.");
   size_t floor = traffic_tiles.size() / threads.size();
@@ -355,8 +358,8 @@ int main(int argc, char** argv) {
     tile_end += (i < at_ceiling ? floor + 1 : floor);
     // Make the thread
     results.emplace_back();
-    threads[i].reset(
-        new std::thread(update_tiles, tile_dir, tile_start, tile_end, std::ref(results.back())));
+    threads[i].reset(new std::thread(update_tiles, tile_dir, tile_start, tile_end,
+                                     std::ref(results.back()), include_osmids));
   }
 
   // wait for it to finish

@@ -318,6 +318,7 @@ void project_and_add_bss_nodes(const boost::property_tree::ptree& pt,
                                std::vector<BSSConnection>& all) {
 
   GraphReader reader_local_level(pt);
+  bool include_osmids = pt.get<bool>("include_osmids", false);
   for (; tile_start != tile_end; ++tile_start) {
 
     graph_tile_ptr local_tile = nullptr;
@@ -327,7 +328,8 @@ void project_and_add_bss_nodes(const boost::property_tree::ptree& pt,
 
       auto tile_id = tile_start->first;
       local_tile = reader_local_level.GetGraphTile(tile_id);
-      tilebuilder_local.reset(new GraphTileBuilder{reader_local_level.tile_dir(), tile_id, true});
+      tilebuilder_local.reset(
+          new GraphTileBuilder{reader_local_level.tile_dir(), tile_id, true, include_osmids});
     }
 
     auto new_connections = project(*local_tile, tile_start->second);
@@ -465,6 +467,8 @@ void create_edges_from_way_node(
     std::unordered_map<GraphId, std::vector<BSSConnection>>::const_iterator tile_end) {
 
   GraphReader reader_local_level(pt);
+  bool include_osmids = pt.get<bool>("include_osmids", false);
+
   for (; tile_start != tile_end; ++tile_start) {
 
     graph_tile_ptr local_tile = nullptr;
@@ -474,7 +478,8 @@ void create_edges_from_way_node(
 
       auto tile_id = tile_start->first;
       local_tile = reader_local_level.GetGraphTile(tile_id);
-      tilebuilder_local.reset(new GraphTileBuilder{reader_local_level.tile_dir(), tile_id, true});
+      tilebuilder_local.reset(
+          new GraphTileBuilder{reader_local_level.tile_dir(), tile_id, true, include_osmids});
     }
     create_edges(*tilebuilder_local, *local_tile, lock, tile_start->second);
   }

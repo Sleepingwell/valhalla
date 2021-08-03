@@ -62,7 +62,7 @@ void make_tile() {
   clean_tiles();
 
   // basic tile information
-  GraphTileBuilder tile(tile_dir, tile_id, false);
+  GraphTileBuilder tile(tile_dir, tile_id, false, false);
   uint32_t edge_index = 0;
 
   auto add_node = [&](const std::pair<GraphId, PointLL>& v, const uint32_t edge_count) {

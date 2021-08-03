@@ -56,6 +56,7 @@ public:
   GraphTileBuilder(const std::string& tile_dir,
                    const GraphId& graphid,
                    const bool deserialize,
+                   const bool include_osmids,
                    bool serialize_turn_lanes = true);
 
   /**
