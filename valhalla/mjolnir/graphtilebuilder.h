@@ -258,6 +258,17 @@ public:
                        bool diff_names = false);
 
   /**
+   * Set the OSM id for the most recently added node.
+   */
+  void set_last_node_osmid(const uint64_t id) {
+    if (has_osmids()) {
+      osmids_for_nodes_.push_back(id);
+    } else {
+      LOG_WARN("Setting OSM id on builder with has_osmids() == false ignored");
+    }
+  }
+
+  /**
    * Set the mean elevation in the most recently added EdgeInfo.
    * @param elev Mean elevation.
    */
@@ -293,6 +304,13 @@ public:
                     const std::string& state_name,
                     const std::string& country_iso,
                     const std::string& state_iso);
+
+  /**
+   * Check whether this tile will contain OSM ids.
+   */
+  bool has_osmids() const {
+    return header_builder_.has_osmids();
+  }
 
   /**
    * Gets a reference to the header builder.
@@ -485,6 +503,9 @@ protected:
   // List of nodes. This is a fixed size structure so it can be
   // indexed directly.
   std::vector<NodeInfo> nodes_builder_;
+
+  // List of OSM ids for the nodes
+  std::vector<uint64_t> osmids_for_nodes_;
 
   // List of directed edges. This is a fixed size structure so it can be
   // indexed directly.

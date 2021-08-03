@@ -985,6 +985,11 @@ void BuildTileSet(const std::string& ways_file,
         // Set drive on right flag
         graphtile.nodes().back().set_drive_on_right(dor);
 
+        // set the osmid for the node
+        if (include_osmids) {
+          graphtile.set_last_node_osmid(node.osmid_);
+        }
+
         // Set the time zone index
         uint32_t tz_index =
             (tile_within_one_tz) ? tz_polys.begin()->first : GetMultiPolyId(tz_polys, node_ll);

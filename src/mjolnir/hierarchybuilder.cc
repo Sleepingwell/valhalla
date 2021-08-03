@@ -207,6 +207,9 @@ void FormTilesInNewLevel(GraphReader& reader,
     // Copy node information and set the node lat,lon offsets within the new tile
     NodeInfo baseni = *(tile->node(base_node.id()));
     tilebuilder->nodes().push_back(baseni);
+    if (tile->has_osmids()) {
+      tilebuilder->set_last_node_osmid(tile->osmid_for_node(base_node.id()));
+    }
     const auto& admin = tile->admininfo(baseni.admin_index());
     NodeInfo& node = tilebuilder->nodes().back();
     node.set_latlng(base_ll, baseni.latlng(tile->header()->base_ll()));

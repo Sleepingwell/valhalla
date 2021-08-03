@@ -1461,6 +1461,7 @@ void TripLegBuilder::Build(
     if (start_tile == nullptr) {
       throw tile_gone_error_t("TripLegBuilder::Build failed", startnode);
     }
+    bool have_osmids = start_tile->has_osmids();
     const NodeInfo* node = start_tile->node(startnode);
 
     if (osmchangeset == 0 && controller.attributes.at(kOsmChangeset)) {
@@ -1519,6 +1520,10 @@ void TripLegBuilder::Build(
       trip_node->mutable_cost()->mutable_transition_cost()->set_seconds(
           edge_itr->transition_cost.secs);
       trip_node->mutable_cost()->mutable_transition_cost()->set_cost(edge_itr->transition_cost.cost);
+    }
+
+    if (have_osmids) {
+      trip_node->set_osmid(start_tile->osmid_for_node(startnode));
     }
 
     // Add multi modal stuff

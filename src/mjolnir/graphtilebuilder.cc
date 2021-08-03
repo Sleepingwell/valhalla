@@ -57,6 +57,9 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
   // Copy tile header to a builder (if tile exists). Always set the tileid
   if (header_) {
     header_builder_ = *header_;
+    header_builder_.set_has_osmids(header_->has_osmids() && include_osmids);
+  } else {
+    header_builder_.set_has_osmids(include_osmids);
   }
   header_builder_.set_graphid(graphid);
 
@@ -142,6 +145,12 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
                                  admins_[i].country_iso(), admins_[i].state_iso());
     name_info.insert({admins_[i].country_offset()});
     name_info.insert({admins_[i].state_offset()});
+  }
+
+  if (has_osmids()) {
+    osmids_for_nodes_.resize(header_->nodecount());
+    std::copy(GraphTile::osmids_for_nodes_, GraphTile::osmids_for_nodes_ + header_->nodecount(),
+              osmids_for_nodes_.begin());
   }
 
   // Edge bins are gotten by parent
@@ -308,6 +317,25 @@ void GraphTileBuilder::StoreTileData() {
     in_mem.write(reinterpret_cast<const char*>(admins_builder_.data()),
                  admins_builder_.size() * sizeof(Admin));
 
+    header_builder_.set_has_osmids(has_osmids());
+    if (has_osmids()) {
+      if (osmids_for_nodes_.size() != nodes_builder_.size()) {
+        throw std::runtime_error(std::string("length of osmids does not equal length of nodes: ") +
+                                 std::to_string(osmids_for_nodes_.size()) +
+                                 " != " + std::to_string(nodes_builder_.size()));
+      }
+      in_mem.write(reinterpret_cast<const char*>(osmids_for_nodes_.data()),
+                   osmids_for_nodes_.size() * sizeof(uint64_t));
+    } else {
+      // TODO: Should this be an assert?
+      // runtime error because we depend on the length in setting the next offset,
+      // could ternary there.
+      if (osmids_for_nodes_.size() != 0u) {
+        throw std::runtime_error(std::string("length of osmids should be zero, not ") +
+                                 std::to_string(osmids_for_nodes_.size()));
+      }
+    }
+
     // Edge bins can only be added after you've stored the tile
 
     // Write the forward complex restriction data
@@ -323,7 +351,7 @@ void GraphTileBuilder::StoreTileData() {
         (schedule_builder_.size() * sizeof(TransitSchedule)) +
         // TODO - once transit transfers are added need to update here
         (signs_builder_.size() * sizeof(Sign)) + (turnlanes_builder_.size() * sizeof(TurnLanes)) +
-        (admins_builder_.size() * sizeof(Admin)));
+        (admins_builder_.size() * sizeof(Admin)) + (osmids_for_nodes_.size() * sizeof(uint64_t)));
     uint32_t forward_restriction_size = 0;
     for (auto& complex_restriction : complex_restriction_forward_builder_) {
       in_mem << complex_restriction;

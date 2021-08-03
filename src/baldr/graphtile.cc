@@ -317,6 +317,11 @@ void GraphTile::Initialize(const GraphId& graphid) {
   admins_ = reinterpret_cast<Admin*>(ptr);
   ptr += header_->admincount() * sizeof(Admin);
 
+  if (header_->has_osmids()) {
+    osmids_for_nodes_ = reinterpret_cast<uint64_t*>(ptr);
+    ptr += header_->nodecount() * sizeof(uint64_t);
+  }
+
   // Set a pointer to the edge bin list
   edge_bins_ = reinterpret_cast<GraphId*>(ptr);
 
