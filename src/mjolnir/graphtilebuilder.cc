@@ -170,6 +170,12 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
     edge_info_offsets.insert(diredge.edgeinfo_offset());
   }
 
+  if (edge_info_offsets.size() != header_->edgeinfocount()) {
+    throw std::runtime_error(
+        std::string("number of edge info offsets does not equal edgeinfocount: ") +
+        std::to_string(edge_info_offsets.size()) + " != " + std::to_string(header_->edgeinfocount()));
+  }
+
   // At this time, complex restrictions are created AFTER all need for
   // serializing and adding to a tile - so we assume they are both empty.
 
@@ -203,6 +209,12 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
     eib.set_encoded_shape(ei.encoded_shape());
     eib.set_has_osmids(has_osmids());
     if (has_osmids()) {
+      auto iint = ei.index_in_tile();
+      if (iint >= header_->edgeinfocount()) {
+        throw std::runtime_error(std::string("edge info greater than number of edge indexes: ") +
+                                 std::to_string(iint) +
+                                 " >= " + std::to_string(header_->edgeinfocount()));
+      }
       eib.set_index_in_tile(ei.index_in_tile());
     }
     edge_info_offset_ += eib.SizeOf();
@@ -340,10 +352,27 @@ void GraphTileBuilder::StoreTileData() {
       }
       in_mem.write(reinterpret_cast<const char*>(osmids_for_nodes_.data()),
                    osmids_for_nodes_.size() * sizeof(uint64_t));
-      assert(osmid_edge_indexes_.size() == edgeinfo_list_.size());
-      assert(osmid_edge_lengths_.size() == edgeinfo_list_.size());
-      assert(std::accumulate(osmid_edge_lengths_.begin(), osmid_edge_lengths_.end(), 0u) ==
-             osmids_for_edges_.size());
+      if (osmid_edge_indexes_.size() != edgeinfo_list_.size()) {
+        throw std::runtime_error(
+            std::string(
+                "number of osmid indexes for edges is not the same as the number of edges: ") +
+            std::to_string(osmid_edge_indexes_.size()) +
+            " != " + std::to_string(edgeinfo_list_.size()));
+      }
+      if (osmid_edge_lengths_.size() != edgeinfo_list_.size()) {
+        throw std::runtime_error(
+            std::string(
+                "number of osmid lengths for edges is not the same as the number of edges: ") +
+            std::to_string(osmid_edge_lengths_.size()) +
+            " != " + std::to_string(edgeinfo_list_.size()));
+      }
+      auto accumlengths = std::accumulate(osmid_edge_lengths_.begin(), osmid_edge_lengths_.end(), 0u);
+      if (accumlengths != osmids_for_edges_.size()) {
+        throw std::runtime_error(
+            std::string(
+                "number of osmids for edges is not the same as the length of all specified lengths: ") +
+            std::to_string(accumlengths) + " != " + std::to_string(nodes_builder_.size()));
+      }
       header_builder_.set_osmidcount(osmids_for_edges_.size());
       in_mem.write(reinterpret_cast<const char*>(osmids_for_edges_.data()),
                    osmids_for_edges_.size() * sizeof(uint64_t));

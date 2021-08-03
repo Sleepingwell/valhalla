@@ -279,7 +279,11 @@ public:
    * @param ids  The ids for the most recently added edge.
    */
   template <typename C> void set_last_edge_osmids(const C& ids) {
-    assert(edgeinfo_list_.back().shape_size() == ids.size());
+    if (edgeinfo_list_.back().shape_size() != ids.size()) {
+      throw std::runtime_error(
+          std::string("ids not the same length as shape in set_la_edge_osmids: ") +
+          std::to_string(ids.size()) + " != " + std::to_string(edgeinfo_list_.back().shape_size()));
+    }
     osmid_edge_indexes_.push_back(osmids_for_edges_.size());
     osmid_edge_lengths_.push_back(ids.size());
     this->osmids_for_edges_.insert(osmids_for_edges_.end(), ids.begin(), ids.end());
@@ -291,7 +295,11 @@ public:
    * the shape for the most recently added edge.
    */
   void set_faux_osmids_for_last_edge(const size_t n) {
-    assert(edgeinfo_list_.back().shape_size() == n);
+    if (edgeinfo_list_.back().shape_size() != n) {
+      throw std::runtime_error(
+          std::string("ids not the same length as shape in set_la_edge_osmids: ") +
+          std::to_string(n) + " != " + std::to_string(edgeinfo_list_.back().shape_size()));
+    }
     osmid_edge_indexes_.push_back(osmids_for_edges_.size());
     osmid_edge_lengths_.push_back(static_cast<uint32_t>(n));
     this->osmids_for_edges_.insert(osmids_for_edges_.end(), n, std::numeric_limits<u_int64_t>::max());
