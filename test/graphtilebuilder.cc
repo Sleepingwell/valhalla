@@ -105,7 +105,7 @@ TEST(GraphTileBuilder, TestDuplicateEdgeInfo) {
 
   // load a test builder
   std::string test_dir = "test/data/builder_tiles";
-  test_graph_tile_builder test(test_dir, GraphId(0, 2, 0), false, false);
+  test_graph_tile_builder test(test_dir, GraphId(0, 2, 0), false);
   test.directededges().emplace_back();
   // add edge info for node 0 to node 1
   bool added = false;
@@ -119,7 +119,7 @@ TEST(GraphTileBuilder, TestDuplicateEdgeInfo) {
   EXPECT_EQ(test.edge_offset_map_.size(), 1) << "There should still be exactly two of these in here";
 
   test.StoreTileData();
-  test_graph_tile_builder test2(test_dir, GraphId(0, 2, 0), false, false);
+  test_graph_tile_builder test2(test_dir, GraphId(0, 2, 0), false);
   auto ei = test2.edgeinfo(&test2.directededge(0));
   EXPECT_NEAR(ei.mean_elevation(), 555.0f, kElevationBinSize);
   EXPECT_EQ(ei.speed_limit(), 120);

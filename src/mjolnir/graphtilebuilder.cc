@@ -49,9 +49,8 @@ std::vector<ComplexRestrictionBuilder> DeserializeRestrictions(char* restriction
 // StoreTileData.
 GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
                                    const GraphId& graphid,
-                                   const bool deserialize,
-                                   const bool include_osmids,
-                                   const bool serialize_turn_lanes)
+                                   bool deserialize,
+                                   bool serialize_turn_lanes)
     : GraphTile(tile_dir, graphid), tile_dir_(tile_dir) {
 
   // Copy tile header to a builder (if tile exists). Always set the tileid

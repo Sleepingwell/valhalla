@@ -124,8 +124,7 @@ bool OpposingEdgeInfoMatches(const graph_tile_ptr& tile, const DirectedEdge* edg
 // Form tiles in the new level.
 void FormTilesInNewLevel(GraphReader& reader,
                          const std::string& new_to_old_file,
-                         const std::string& old_to_new_file,
-                         const bool include_osmids) {
+                         const std::string& old_to_new_file) {
   // Use the sequence that associate new nodes to old nodes
   sequence<std::pair<GraphId, GraphId>> new_to_old(new_to_old_file, false);
 
@@ -180,7 +179,7 @@ void FormTilesInNewLevel(GraphReader& reader,
 
       // New tilebuilder for the next tile. Update current level.
       tile_id = nodea.Tile_Base();
-      tilebuilder = new GraphTileBuilder(reader.tile_dir(), tile_id, false, include_osmids);
+      tilebuilder = new GraphTileBuilder(reader.tile_dir(), tile_id, false);
       current_level = nodea.level();
 
       // Set the base ll for this tile
@@ -490,9 +489,7 @@ void CreateNodeAssociations(GraphReader& reader,
 /**
  * Update end nodes of transit connection directed edges.
  */
-void UpdateTransitConnections(GraphReader& reader,
-                              const std::string& old_to_new_file,
-                              const bool include_osmids) {
+void UpdateTransitConnections(GraphReader& reader, const std::string& old_to_new_file) {
   // Use the sorted sequence that associates old nodes to new nodes
   sequence<OldToNewNodes> old_to_new(old_to_new_file, false);
 
@@ -506,7 +503,7 @@ void UpdateTransitConnections(GraphReader& reader,
     }
 
     // Create a new tile builder
-    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false, include_osmids);
+    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, false);
 
     // Update end nodes of transit connection directed edges
     std::vector<NodeInfo> nodes;
@@ -591,7 +588,6 @@ void HierarchyBuilder::Build(const boost::property_tree::ptree& pt,
   // Construct GraphReader
   LOG_INFO("HierarchyBuilder");
   GraphReader reader(pt.get_child("mjolnir"));
-  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
 
   // Association of old nodes to new nodes
   CreateNodeAssociations(reader, new_to_old_file, old_to_new_file);
@@ -601,7 +597,7 @@ void HierarchyBuilder::Build(const boost::property_tree::ptree& pt,
 
   // Iterate through the hierarchy (from highway down to local) and build
   // new tiles
-  FormTilesInNewLevel(reader, new_to_old_file, old_to_new_file, include_osmids);
+  FormTilesInNewLevel(reader, new_to_old_file, old_to_new_file);
 
   // Remove any base tiles that no longer have any data (nodes and edges
   // only exist on arterial and highway levels)
@@ -611,7 +607,7 @@ void HierarchyBuilder::Build(const boost::property_tree::ptree& pt,
   auto hierarchy_properties = pt.get_child("mjolnir");
   auto transit_dir = hierarchy_properties.get_optional<std::string>("transit_dir");
   if (transit_dir && filesystem::exists(*transit_dir) && filesystem::is_directory(*transit_dir)) {
-    UpdateTransitConnections(reader, old_to_new_file, include_osmids);
+    UpdateTransitConnections(reader, old_to_new_file);
   }
 
   LOG_INFO("Done HierarchyBuilder");

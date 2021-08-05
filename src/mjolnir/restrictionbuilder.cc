@@ -279,8 +279,6 @@ void HandleOnlyRestrictionProperties(const std::vector<Result>& results,
                                      const boost::property_tree::ptree& config) {
   std::unordered_map<GraphId, std::vector<const ComplexRestrictionBuilder*>> restrictions;
   std::unordered_map<GraphId, std::vector<GraphId>> part_of_restriction;
-  bool include_osmids = config.get<bool>("include_osmids", false);
-
   for (const auto& res : results) {
     for (const auto& restriction : res.restrictions) {
       restrictions[restriction.to_graphid().Tile_Base()].push_back(&restriction);
@@ -297,7 +295,7 @@ void HandleOnlyRestrictionProperties(const std::vector<Result>& results,
     if (!tile)
       continue;
 
-    GraphTileBuilder tile_builder(reader.tile_dir(), tile_id, true, include_osmids);
+    GraphTileBuilder tile_builder(reader.tile_dir(), tile_id, true);
     for (auto restriction : i.second) {
       tile_builder.AddForwardComplexRestriction(*restriction);
       DirectedEdge& edge = tile_builder.directededge_builder(restriction->to_graphid().id());
@@ -312,7 +310,7 @@ void HandleOnlyRestrictionProperties(const std::vector<Result>& results,
     if (!tile)
       continue;
 
-    GraphTileBuilder tile_builder(reader.tile_dir(), tile_id, true, include_osmids);
+    GraphTileBuilder tile_builder(reader.tile_dir(), tile_id, true);
     for (GraphId edge_id : i.second) {
       DirectedEdge& edge = tile_builder.directededge_builder(edge_id.id());
       edge.complex_restriction(true);
@@ -326,8 +324,7 @@ void build(const std::string& complex_restriction_from_file,
            const boost::property_tree::ptree& hierarchy_properties,
            std::queue<GraphId>& tilequeue,
            std::mutex& lock,
-           std::promise<Result>& result,
-           const bool include_osmids) {
+           std::promise<Result>& result) {
   sequence<OSMRestriction> complex_restrictions_from(complex_restriction_from_file, false);
   sequence<OSMRestriction> complex_restrictions_to(complex_restriction_to_file, false);
 
@@ -356,7 +353,7 @@ void build(const std::string& complex_restriction_from_file,
     }
 
     // Tile builder - serialize in existing tile
-    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, true, include_osmids);
+    GraphTileBuilder tilebuilder(reader.tile_dir(), tile_id, true);
     lock.unlock();
 
     std::unordered_multimap<GraphId, ComplexRestrictionBuilder> forward_tmp_cr;
@@ -729,8 +726,6 @@ void RestrictionBuilder::Build(const boost::property_tree::ptree& pt,
 
   boost::property_tree::ptree hierarchy_properties = pt.get_child("mjolnir");
   GraphReader reader(hierarchy_properties);
-  bool include_osmids = hierarchy_properties.get<bool>("include_osmids", false);
-
   for (auto tl = TileHierarchy::levels().rbegin(); tl != TileHierarchy::levels().rend(); ++tl) {
     // Create a randomized queue of tiles to work from
     std::deque<GraphId> tempqueue;
@@ -758,7 +753,7 @@ void RestrictionBuilder::Build(const boost::property_tree::ptree& pt,
       threads[i].reset(new std::thread(build, std::cref(complex_from_restrictions_file),
                                        std::cref(complex_to_restrictions_file),
                                        std::cref(hierarchy_properties), std::ref(tilequeue),
-                                       std::ref(lock), std::ref(promises[i]), include_osmids));
+                                       std::ref(lock), std::ref(promises[i])));
     }
 
     // Wait for them to finish up their work

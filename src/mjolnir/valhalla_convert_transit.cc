@@ -973,8 +973,6 @@ void build_tiles(const boost::property_tree::ptree& pt,
   stats.midnight_dep_count = 0;
 
   GraphReader reader_transit_level(pt);
-  bool include_osmids = pt.get<bool>("include_osmids", false);
-
   auto database = pt.get_optional<std::string>("timezone");
   // Initialize the tz DB (if it exists)
   sqlite3* tz_db_handle = GetDBHandle(*database);
@@ -1011,8 +1009,7 @@ void build_tiles(const boost::property_tree::ptree& pt,
 
     GraphId transit_tile_id = GraphId(tile_id.tileid(), tile_id.level() + 1, tile_id.id());
     graph_tile_ptr transit_tile = reader_transit_level.GetGraphTile(transit_tile_id);
-    GraphTileBuilder tilebuilder_transit(reader_transit_level.tile_dir(), transit_tile_id, false,
-                                         include_osmids);
+    GraphTileBuilder tilebuilder_transit(reader_transit_level.tile_dir(), transit_tile_id, false);
 
     auto tz = DateTime::get_tz_db().from_index(DateTime::get_tz_db().to_index("America/New_York"));
     uint32_t tile_creation_date =

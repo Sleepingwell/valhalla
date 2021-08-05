@@ -53,7 +53,7 @@ vj::GraphTileBuilder& graph_writer::builder(vb::GraphId tile_id) {
 
   if (itr == m_builders.end()) {
     bool inserted = false;
-    auto builder = std::make_shared<vj::GraphTileBuilder>(test_tile_dir, tile_id, false, false);
+    auto builder = std::make_shared<vj::GraphTileBuilder>(test_tile_dir, tile_id, false);
 
     std::tie(itr, inserted) = m_builders.emplace(tile_id, builder);
     // should be new, since itr == end.

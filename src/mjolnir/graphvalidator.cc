@@ -255,8 +255,6 @@ void validate(
   tweeners_t tweeners;
   // Local Graphreader
   GraphReader graph_reader(pt.get_child("mjolnir"));
-  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
-
   // Get some things we need throughout
   auto numLevels = TileHierarchy::levels().size() + 1; // To account for transit
   auto transit_level = TileHierarchy::GetTransitLevel().level;
@@ -290,7 +288,7 @@ void validate(
     auto tileid = tile_id.tileid();
 
     // Get the tile
-    GraphTileBuilder tilebuilder(graph_reader.tile_dir(), tile_id, false, include_osmids);
+    GraphTileBuilder tilebuilder(graph_reader.tile_dir(), tile_id, false);
 
     // Update nodes and directed edges as needed
     std::vector<NodeInfo> nodes;
@@ -507,8 +505,7 @@ void bin_tweeners(const std::string& tile_dir,
                   tweeners_t::iterator& start,
                   const tweeners_t::iterator& end,
                   uint64_t dataset_id,
-                  std::mutex& lock,
-                  const bool include_osmids) {
+                  std::mutex& lock) {
   // go while we have tiles to update
   while (true) {
     lock.lock();
@@ -525,7 +522,7 @@ void bin_tweeners(const std::string& tile_dir,
     // if that's the case we need to make a tile to store the spatial index (binned edges) there
     auto tile = GraphTile::Create(tile_dir, tile_bin.first);
     if (!tile) {
-      GraphTileBuilder empty(tile_dir, tile_bin.first, false, include_osmids);
+      GraphTileBuilder empty(tile_dir, tile_bin.first, false);
       empty.header_builder().set_dataset_id(dataset_id);
       empty.StoreTileData();
       tile = GraphTile::Create(tile_dir, tile_bin.first);
@@ -543,7 +540,6 @@ namespace mjolnir {
 void GraphValidator::Validate(const boost::property_tree::ptree& pt) {
   LOG_INFO("Validating, finishing and binning tiles...");
   auto hierarchy_properties = pt.get_child("mjolnir");
-  bool include_osmids = hierarchy_properties.get<bool>("include_osmids", false);
   std::string tile_dir = hierarchy_properties.get<std::string>("tile_dir");
 
   // Create a randomized queue of tiles (at all levels) to work from
@@ -609,7 +605,7 @@ void GraphValidator::Validate(const boost::property_tree::ptree& pt) {
   auto end = tweeners.end();
   for (auto& thread : threads) {
     thread.reset(new std::thread(bin_tweeners, std::cref(tile_dir), std::ref(start), std::cref(end),
-                                 dataset_id, std::ref(lock), include_osmids));
+                                 dataset_id, std::ref(lock)));
   }
   for (auto& thread : threads) {
     thread->join();

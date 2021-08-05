@@ -122,7 +122,7 @@ void CountryAccess(const std::string& config_file) {
   auto t = GraphTile::Create("test/data/amsterdam_tiles", id);
   ASSERT_TRUE(t);
 
-  GraphTileBuilder tilebuilder(graph_reader.tile_dir(), id, true, false);
+  GraphTileBuilder tilebuilder(graph_reader.tile_dir(), id, true);
 
   for (uint32_t i = 0; i < tilebuilder.header()->nodecount(); i++) {
     NodeInfo& nodeinfo = tilebuilder.node_builder(i);
@@ -195,7 +195,7 @@ void CountryAccess(const std::string& config_file) {
   ASSERT_TRUE(t2);
 
   GraphReader graph_reader2(conf.get_child("mjolnir"));
-  GraphTileBuilder tilebuilder2(graph_reader2.tile_dir(), id2, true, false);
+  GraphTileBuilder tilebuilder2(graph_reader2.tile_dir(), id2, true);
 
   for (uint32_t i = 0; i < tilebuilder2.header()->nodecount(); i++) {
     NodeInfo& nodeinfo = tilebuilder2.node_builder(i);

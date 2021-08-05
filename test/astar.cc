@@ -180,7 +180,7 @@ void make_tile() {
                             mjolnir::BuildStage::kInitialize, mjolnir::BuildStage::kValidate,
                             release_osmpbf_memory);
     /** Set the freeflow and constrained flow speeds manually on all edges */
-    vj::GraphTileBuilder tile_builder(test_dir, tile_id, false, false);
+    vj::GraphTileBuilder tile_builder(test_dir, tile_id, false);
     std::vector<DirectedEdge> directededges;
     directededges.reserve(tile_builder.header()->directededgecount());
     for (uint32_t j = 0; j < tile_builder.header()->directededgecount(); ++j) {
@@ -1605,7 +1605,7 @@ TEST(BiDiAstar, test_recost_path) {
     for (const auto& edgeid : edge_ids) {
       GraphId tileid(edgeid.tileid(), edgeid.level(), 0);
       auto tile = graphreader.GetGraphTile(tileid);
-      vj::GraphTileBuilder tile_builder(test_dir, tileid, false, false);
+      vj::GraphTileBuilder tile_builder(test_dir, tileid, false);
       std::vector<DirectedEdge> edges;
       for (uint32_t j = 0; j < tile->header()->directededgecount(); ++j) {
         DirectedEdge& edge = tile_builder.directededge(j);

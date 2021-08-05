@@ -574,7 +574,6 @@ void build(const boost::property_tree::ptree& pt,
   // GraphReader for local level and for transit level.
   GraphReader reader_local_level(pt);
   GraphReader reader_transit_level(pt);
-  bool include_osmids = pt.get<bool>("include_osmids");
 
   // Iterate through the tiles in the queue and find any that include stops
   for (; tile_start != tile_end; ++tile_start) {
@@ -593,12 +592,11 @@ void build(const boost::property_tree::ptree& pt,
     // a writeable instance (deserialize it so we can add to it)
     lock.lock();
     graph_tile_ptr local_tile = reader_local_level.GetGraphTile(tile_id);
-    GraphTileBuilder tilebuilder_local(reader_local_level.tile_dir(), tile_id, true, include_osmids);
+    GraphTileBuilder tilebuilder_local(reader_local_level.tile_dir(), tile_id, true);
 
     GraphId transit_tile_id = GraphId(tile_id.tileid(), tile_id.level() + 1, tile_id.id());
     graph_tile_ptr transit_tile = reader_transit_level.GetGraphTile(transit_tile_id);
-    GraphTileBuilder tilebuilder_transit(reader_transit_level.tile_dir(), transit_tile_id, true,
-                                         include_osmids);
+    GraphTileBuilder tilebuilder_transit(reader_transit_level.tile_dir(), transit_tile_id, true);
 
     lock.unlock();
 

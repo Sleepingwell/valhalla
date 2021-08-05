@@ -442,7 +442,7 @@ void BuildTileSet(const std::string& ways_file,
     try {
       // What actually writes the tile
       GraphId tile_id = tile_start->first.Tile_Base();
-      GraphTileBuilder graphtile(tile_dir, tile_id, false, include_osmids, true);
+      GraphTileBuilder graphtile(tile_dir, tile_id, false);
 
       // Information about tile creation
       graphtile.AddTileCreationDate(tile_creation_date);

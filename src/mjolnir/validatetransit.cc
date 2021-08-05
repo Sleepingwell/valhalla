@@ -169,7 +169,6 @@ void validate(const boost::property_tree::ptree& pt,
 
   uint32_t failure_count = 0;
   GraphReader reader_transit_level(pt);
-  bool include_osmids = pt.get<bool>("include_osmids", false);
 
   std::unordered_multimap<std::string, std::string> passed_tests;
   std::unordered_multimap<std::string, std::string> failed_tests;
@@ -185,8 +184,7 @@ void validate(const boost::property_tree::ptree& pt,
     lock.lock();
     GraphId transit_tile_id = GraphId(tile_id.tileid(), tile_id.level() + 1, tile_id.id());
     auto transit_tile = reader_transit_level.GetGraphTile(transit_tile_id);
-    GraphTileBuilder tilebuilder(reader_transit_level.tile_dir(), transit_tile_id, true,
-                                 include_osmids);
+    GraphTileBuilder tilebuilder(reader_transit_level.tile_dir(), transit_tile_id, true);
     lock.unlock();
 
     for (uint32_t i = 0; i < tilebuilder.header()->nodecount(); i++) {

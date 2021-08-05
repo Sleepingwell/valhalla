@@ -576,7 +576,7 @@ uint32_t AddShortcutEdges(GraphReader& reader,
 }
 
 // Form shortcuts for tiles in this level.
-uint32_t FormShortcuts(GraphReader& reader, const TileLevel& level, const bool include_osmids) {
+uint32_t FormShortcuts(GraphReader& reader, const TileLevel& level) {
   // Iterate through the tiles at this level (TODO - can we mark the tiles
   // the tiles that shortcuts end within?)
   reader.Clear();
@@ -594,7 +594,7 @@ uint32_t FormShortcuts(GraphReader& reader, const TileLevel& level, const bool i
 
     // Create GraphTileBuilder for the new tile
     GraphId new_tile(tileid, tile_level, 0);
-    GraphTileBuilder tilebuilder(reader.tile_dir(), new_tile, false, include_osmids);
+    GraphTileBuilder tilebuilder(reader.tile_dir(), new_tile, false);
 
     // Since the old tile is not serialized we must copy any data that is not
     // dependent on edge Id into the new builders (e.g., node transitions)
@@ -746,14 +746,13 @@ void ShortcutBuilder::Build(const boost::property_tree::ptree& pt) {
 
   // Get GraphReader
   GraphReader reader(pt.get_child("mjolnir"));
-  bool include_osmids = pt.get<bool>("mjolnir.include_osmids", false);
 
   auto tile_level = TileHierarchy::levels().rbegin();
   tile_level++;
   for (; tile_level != TileHierarchy::levels().rend(); ++tile_level) {
     // Create shortcuts on this level
     LOG_INFO("Creating shortcuts on level " + std::to_string(tile_level->level));
-    uint32_t count = FormShortcuts(reader, *tile_level, include_osmids);
+    uint32_t count = FormShortcuts(reader, *tile_level);
     LOG_INFO("Finished with " + std::to_string(count) + " shortcuts");
   }
 }
