@@ -385,11 +385,6 @@ void GraphTileBuilder::StoreTileData() {
       in_mem.write(reinterpret_cast<const char*>(osmids_for_nodes_.data()),
                    osmids_for_nodes_.size() * sizeof(uint64_t));
     } else {
-      // TODO: Should this be an assert?
-      if (osmids_for_nodes_.size() != 0u) {
-        throw std::runtime_error(std::string("length of osmids should be zero, not ") +
-                                 std::to_string(osmids_for_nodes_.size()));
-      }
       header_builder_.set_osmids_for_nodes_offset(0u);
       header_builder_.set_end_offset(header_builder_.lane_connectivity_offset() +
                                      lane_connectivity_builder_.size() * sizeof(LaneConnectivity));
