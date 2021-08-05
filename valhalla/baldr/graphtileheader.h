@@ -17,7 +17,7 @@ namespace baldr {
 // something to the tile simply subtract one from this number and add it
 // just before the empty_slots_ array below. NOTE that it can ONLY be an
 // offset in bytes and NOT a bitfield or union or anything of that sort
-constexpr size_t kEmptySlots = 11;
+constexpr size_t kEmptySlots = 10;
 
 // Maximum size of the version string (stored as a fixed size
 // character array so the GraphTileHeader size remains fixed).
@@ -237,15 +237,7 @@ public:
    * @return \c true if it does and \c false otherwise.
    */
   bool has_osmids() const {
-    return static_cast<bool>(has_osmids_);
-  }
-
-  /**
-   * Set whether this tile has OSM ids?
-   * @param state whether this tile has OSM ids.
-   */
-  void set_has_osmids(const bool state) {
-    has_osmids_ = state;
+    return osmids_for_nodes_offset_ != 0;
   }
 
   /**
@@ -558,6 +550,22 @@ public:
   }
 
   /**
+   * Gets the offset to the OSM ids for nodes data.
+   * @return  Returns the number of bytes to offset to the OSM data for nodes.
+   */
+  uint32_t osmids_for_nodes_offset() const {
+    return osmids_for_nodes_offset_;
+  }
+
+  /**
+   * Sets the offset to the OSM ids for nodes data.
+   * @param offset Offset in bytes to the start of the lane OSM ids data for nodes.
+   */
+  void set_osmids_for_nodes_offset(const uint32_t offset) {
+    osmids_for_nodes_offset_ = offset;
+  }
+
+  /**
    * Gets the number of  turn lanes in this tile.
    * @return  Returns the number of  turn lanes.
    */
@@ -630,7 +638,7 @@ protected:
   uint64_t nodecount_ : 21;             // Number of nodes
   uint64_t directededgecount_ : 21;     // Number of directed edges
   uint64_t predictedspeeds_count_ : 21; // Number of predictive speed records
-  uint64_t has_osmids_ : 1;             // (bool) Whether the tile has OSM ids
+  uint64_t spare1_ : 1;
 
   // Currently there can only be twice as many transitions as there are nodes,
   // but in practice the number should be much less.
@@ -702,6 +710,9 @@ protected:
 
   // GraphTile data size in bytes
   uint32_t tile_size_;
+
+  // Offset to the beggining of the OSM ids for nodes data.
+  uint32_t osmids_for_nodes_offset_;
 
   // Marks the end of this version of the tile with the rest of the slots
   // being available for growth. If you want to use one of the empty slots,

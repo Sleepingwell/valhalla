@@ -309,7 +309,7 @@ public:
    * Check whether this tile will contain OSM ids.
    */
   bool has_osmids() const {
-    return header_builder_.has_osmids();
+    return osmids_for_nodes_.size() != 0;
   }
 
   /**
