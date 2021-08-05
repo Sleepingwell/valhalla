@@ -386,8 +386,6 @@ void GraphTileBuilder::StoreTileData() {
                    osmids_for_nodes_.size() * sizeof(uint64_t));
     } else {
       // TODO: Should this be an assert?
-      // runtime error because we depend on the length in setting the next offset,
-      // could ternary there.
       if (osmids_for_nodes_.size() != 0u) {
         throw std::runtime_error(std::string("length of osmids should be zero, not ") +
                                  std::to_string(osmids_for_nodes_.size()));

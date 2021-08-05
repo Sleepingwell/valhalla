@@ -535,7 +535,7 @@ public:
 
   /**
    * Gets the offset to the lane connectivity data.
-   * @return  Returns the number of bytes to offset to the the lane connectivity data.
+   * @return  Returns the number of bytes to offset to the lane connectivity data.
    */
   uint32_t lane_connectivity_offset() const {
     return lane_connectivity_offset_;
