@@ -130,6 +130,9 @@ json::ArrayPtr serialize_edges(const AttributesController& controller,
       if (edge.has_way_id()) {
         edge_map->emplace("way_id", static_cast<uint64_t>(edge.way_id()));
       }
+      if (trip_path.node(i - 1).has_osmid()) {
+        edge_map->emplace("osmid", static_cast<uint64_t>(trip_path.node(i - 1).osmid()));
+      }
       if (edge.has_id()) {
         edge_map->emplace("id", static_cast<uint64_t>(edge.id()));
       }
@@ -322,7 +325,6 @@ json::ArrayPtr serialize_edges(const AttributesController& controller,
           end_node_map->emplace("transition_time",
                                 json::fixed_t{node.cost().transition_cost().seconds(), 3});
         }
-
         if (node.has_osmid()) {
           end_node_map->emplace("osmid", static_cast<uint64_t>(node.osmid()));
         }
