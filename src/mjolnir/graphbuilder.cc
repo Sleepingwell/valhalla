@@ -430,7 +430,7 @@ void BuildTileSet(const std::string& ways_file,
   bool added = false;
   DataQuality stats;
 
-  bool include_osmids = pt.get<bool>("include_osmids", false);
+  bool include_osmids = pt.get<bool>("include_osmids_for_nodes", false);
 
   // Lots of times in a given tile we may end up accessing the same
   // shape/attributes twice we avoid doing this by caching it here

@@ -304,7 +304,7 @@ public:
   /**
    * Check whether this tile will contain OSM ids.
    */
-  bool has_osmids() const {
+  bool has_osmids_for_nodes() const {
     return osmids_for_nodes_.size() != 0;
   }
 

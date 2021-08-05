@@ -214,7 +214,7 @@ GraphTileBuilder::GraphTileBuilder(const std::string& tile_dir,
   std::copy(lane_connectivity_, lane_connectivity_ + n,
             std::back_inserter(lane_connectivity_builder_));
 
-  if (header_builder_.has_osmids()) {
+  if (header_builder_.has_osmids_for_nodes()) {
     osmids_for_nodes_.resize(header_->nodecount());
     std::copy(GraphTile::osmids_for_nodes_, GraphTile::osmids_for_nodes_ + header_->nodecount(),
               osmids_for_nodes_.begin());
@@ -371,7 +371,7 @@ void GraphTileBuilder::StoreTileData() {
     in_mem.write(reinterpret_cast<const char*>(lane_connectivity_builder_.data()),
                  lane_connectivity_builder_.size() * sizeof(LaneConnectivity));
 
-    if (has_osmids()) {
+    if (has_osmids_for_nodes()) {
       if (osmids_for_nodes_.size() != nodes_builder_.size()) {
         throw std::runtime_error(std::string("length of osmids does not equal length of nodes: ") +
                                  std::to_string(osmids_for_nodes_.size()) +

@@ -197,7 +197,7 @@ public:
    * @return  Returns the OSM id.
    */
   uint64_t osmid_for_node(const size_t idx) const {
-    assert(has_osmids());
+    assert(has_osmids_for_nodes());
     if (idx < header_->nodecount()) {
       return osmids_for_nodes_[idx];
     }
@@ -212,8 +212,8 @@ public:
    * Does this tile contain OSM ids?
    * @return Return \c true if this tile contains OSM ids and \c false otherwise.
    */
-  bool has_osmids() const {
-    return header_->has_osmids();
+  bool has_osmids_for_nodes() const {
+    return header_->has_osmids_for_nodes();
   }
 
   /**

@@ -236,7 +236,7 @@ public:
    * Does the tile contain OSM ids?
    * @return \c true if it does and \c false otherwise.
    */
-  bool has_osmids() const {
+  bool has_osmids_for_nodes() const {
     return osmids_for_nodes_offset_ != 0;
   }
 

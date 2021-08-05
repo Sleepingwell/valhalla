@@ -1521,7 +1521,7 @@ void TripLegBuilder::Build(
       trip_node->mutable_cost()->mutable_transition_cost()->set_cost(edge_itr->transition_cost.cost);
     }
 
-    if (start_tile->has_osmids()) {
+    if (start_tile->has_osmids_for_nodes()) {
       trip_node->set_osmid(start_tile->osmid_for_node(startnode));
     }
 
