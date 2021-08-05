@@ -712,7 +712,7 @@ uint32_t FormShortcuts(GraphReader& reader, const TileLevel& level) {
       }
       tilebuilder.nodes().emplace_back(std::move(nodeinfo));
       if (tile->has_osmids()) {
-        tilebuilder.set_last_node_osmid(tile->osmid_for_node(node_id));
+        tilebuilder.osmids_for_nodes().push_back(tile->osmid_for_node(node_id));
       }
     }
 

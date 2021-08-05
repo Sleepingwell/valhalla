@@ -96,6 +96,14 @@ public:
   }
 
   /**
+   * Gets the current list of OSM ids for node (builders).
+   * @return  Returns a reference to OSM id builders.
+   */
+  std::vector<uint64_t>& osmids_for_nodes() {
+    return osmids_for_nodes_;
+  }
+
+  /**
    * Add a transit departure.
    * @param  departure  Transit departure record.
    */
@@ -255,17 +263,6 @@ public:
                        const uint16_t types,
                        bool& added,
                        bool diff_names = false);
-
-  /**
-   * Set the OSM id for the most recently added node.
-   */
-  void set_last_node_osmid(const uint64_t id) {
-    if (has_osmids()) {
-      osmids_for_nodes_.push_back(id);
-    } else {
-      LOG_WARN("Setting OSM id on builder with has_osmids() == false ignored");
-    }
-  }
 
   /**
    * Set the mean elevation in the most recently added EdgeInfo.

@@ -987,7 +987,7 @@ void BuildTileSet(const std::string& ways_file,
 
         // set the osmid for the node
         if (include_osmids) {
-          graphtile.set_last_node_osmid(node.osmid_);
+          graphtile.osmids_for_nodes().push_back(node.osmid_);
         }
 
         // Set the time zone index

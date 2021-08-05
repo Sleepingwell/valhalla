@@ -207,7 +207,7 @@ void FormTilesInNewLevel(GraphReader& reader,
     NodeInfo baseni = *(tile->node(base_node.id()));
     tilebuilder->nodes().push_back(baseni);
     if (tile->has_osmids()) {
-      tilebuilder->set_last_node_osmid(tile->osmid_for_node(base_node.id()));
+      tilebuilder->osmids_for_nodes().push_back(tile->osmid_for_node(base_node.id()));
     }
     const auto& admin = tile->admininfo(baseni.admin_index());
     NodeInfo& node = tilebuilder->nodes().back();
