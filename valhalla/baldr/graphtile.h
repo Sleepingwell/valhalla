@@ -197,15 +197,14 @@ public:
    * @return  Returns the OSM id.
    */
   uint64_t osmid_for_node(const size_t idx) const {
-    assert(has_osmids_for_nodes());
-    if (idx < header_->nodecount()) {
-      return osmids_for_nodes_[idx];
-    }
-    throw std::runtime_error(
+    if (idx > header_->nodecount()) {
+      throw std::runtime_error(
         std::string(__FILE__) + ":" + std::to_string(__LINE__) +
         " GraphTile NodeInfo index out of bounds: " + std::to_string(header_->graphid().tileid()) +
         "," + std::to_string(header_->graphid().level()) + "," + std::to_string(idx) +
         " nodecount= " + std::to_string(header_->nodecount()));
+    }
+    return header_->has_osmids_for_nodes() ? osmids_for_nodes_[idx] : kInvalidNodeId;
   }
 
   /**
