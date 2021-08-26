@@ -58,6 +58,7 @@ const std::unordered_map<std::string, bool> AttributesController::kDefaultAttrib
     {kEdgeTransitRouteInfoOperatorUrl, true},
     {kEdgeId, true},
     {kEdgeWayId, true},
+    {kEdgeNodeId, true},
     {kEdgeWeightedGrade, true},
     {kEdgeMaxUpwardGrade, true},
     {kEdgeMaxDownwardGrade, true},
@@ -112,6 +113,7 @@ const std::unordered_map<std::string, bool> AttributesController::kDefaultAttrib
     {kNodeTransitEgressInfoLatLon, true},
     {kNodeTimeZone, true},
     {kNodeTransitionTime, true},
+    {kNodeNodeId, true},
 
     // Top level: admin list, full shape, and shape bounding box keys
     {kOsmChangeset, true},
