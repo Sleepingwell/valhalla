@@ -1039,6 +1039,11 @@ TripLeg_Edge* AddTripEdge(const AttributesController& controller,
     trip_edge->set_way_id(edgeinfo.wayid());
   }
 
+  // Set node id (OSM nod id) if requested
+  if (controller.attributes.at(kEdgeNodeId) && start_tile->has_osmids_for_nodes()) {
+    trip_edge->set_osmid(start_tile->osmid_for_node(start_node_idx));
+  }
+
   // Set weighted grade if requested
   if (controller.attributes.at(kEdgeWeightedGrade)) {
     trip_edge->set_weighted_grade((directededge->weighted_grade() - 6.f) / 0.6f);

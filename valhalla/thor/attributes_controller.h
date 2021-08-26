@@ -55,6 +55,7 @@ const std::string kEdgeTransitRouteInfoOperatorName = "edge.transit_route_info.o
 const std::string kEdgeTransitRouteInfoOperatorUrl = "edge.transit_route_info.operator_url";
 const std::string kEdgeId = "edge.id";
 const std::string kEdgeWayId = "edge.way_id";
+const std::string kEdgeNodeId = "edge.node_id";
 const std::string kEdgeWeightedGrade = "edge.weighted_grade";
 const std::string kEdgeMaxUpwardGrade = "edge.max_upward_grade";
 const std::string kEdgeMaxDownwardGrade = "edge.max_downward_grade";

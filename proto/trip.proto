@@ -238,6 +238,8 @@ message TripLeg {
 
     optional SacScale sac_scale = 51;
     optional bool shoulder = 52;
+
+    optional uint64 osmid = 53;
   }
 
   message IntersectingEdge {

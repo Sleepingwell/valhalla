@@ -130,6 +130,9 @@ json::ArrayPtr serialize_edges(const AttributesController& controller,
       if (edge.has_way_id()) {
         edge_map->emplace("way_id", static_cast<uint64_t>(edge.way_id()));
       }
+      if (edge.has_osmid()) {
+        edge_map->emplace("node_id", static_cast<uint64_t>(edge.osmid()));
+      }
       if (edge.has_id()) {
         edge_map->emplace("id", static_cast<uint64_t>(edge.id()));
       }
