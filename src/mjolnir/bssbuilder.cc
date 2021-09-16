@@ -291,6 +291,9 @@ void add_bss_nodes_and_edges(GraphTileBuilder& tilebuilder_local,
                                  static_cast<uint32_t>(tilebuilder_local.nodes().size())};
 
     tilebuilder_local.nodes().emplace_back(std::move(new_bss_node));
+    if(tilebuilder_local.has_osmids_for_nodes()) {
+      tilebuilder_local.osmids_for_nodes().push_back(kInvalidNodeId);
+    }
 
     for (int j = 0; j < 4; j++) {
       auto& bss_to_waynode = *(it + j);
