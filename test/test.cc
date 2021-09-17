@@ -233,6 +233,7 @@ boost::property_tree::ptree make_config(const std::string& path_prefix,
         "include_bicycle": true,
         "include_driveways": true,
         "include_driving": true,
+        "include_osmids_for_nodes": false,
         "include_pedestrian": true,
         "logging": {
           "color": false,
